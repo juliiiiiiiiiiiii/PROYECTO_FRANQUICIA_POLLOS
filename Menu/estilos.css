@@ -1,0 +1,98 @@
+/* Colores de la franquicia */
+:root {
+    --rojo: #d62828;
+    --naranja: #f77f00;
+    --amarillo: #fcbf49;
+}
+
+/* Fondo general */
+body {
+    background-color: #ffffff;
+    border-top: 8px solid var(--naranja);
+    border-bottom: 8px solid var(--naranja);
+    box-sizing: border-box;
+    min-height: 100vh;
+}
+
+/* Encabezado */
+.encabezado {
+    background-color: #fff7ec;
+    border-bottom: 6px solid var(--rojo);
+}
+
+/* Logo */
+.logo {
+    width: 140px;
+    height: 140px;
+    object-fit: contain;
+}
+
+/* Título */
+.titulo {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--rojo);
+}
+
+.subtitulo {
+    color: var(--naranja);
+    font-weight: 600;
+}
+
+/* Títulos de sección */
+.titulo-seccion {
+    color: var(--rojo);
+    font-weight: bold;
+    font-size: 1.5rem;
+    margin-bottom: 1.2rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 3px solid var(--amarillo);
+}
+
+/* Tarjetas de producto */
+.tarjeta-producto {
+    border: none;
+    border-radius: 15px;
+    border-top: 5px solid var(--naranja);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.tarjeta-producto:hover {
+    transform: translateY(-4px);
+    border-top-color: var(--rojo);
+}
+
+/* Nombre del producto */
+.nombre-producto {
+    color: var(--rojo);
+    font-weight: bold;
+    font-size: 1.15rem;
+}
+
+/* Descripción */
+.descripcion {
+    color: #555;
+    font-size: 0.95rem;
+    min-height: 48px;
+}
+
+/* Precio */
+.precio {
+    display: inline-block;
+    background-color: var(--amarillo);
+    color: #5a3a00;
+    font-weight: bold;
+    padding: 5px 14px;
+    border-radius: 20px;
+}
+
+/* Pie de página */
+.pie-pagina {
+    background-color: #fff7ec;
+    border-top: 6px solid var(--rojo);
+}
+
+.pie {
+    color: #888;
+    font-size: 0.85rem;
+}
