@@ -36,6 +36,22 @@ body {
 .subtitulo {
     color: var(--naranja);
     font-weight: 600;
+    font-size: 20px;
+}
+
+/* Menú de navegación */
+.enlace-nav {
+    color: #444;
+    font-weight: 600;
+    font-size: 1.2rem;
+    margin-left: 0.5rem;
+    border-bottom: 3px solid transparent;
+}
+
+.enlace-nav:hover,
+.enlace-nav:focus {
+    color: var(--rojo);
+    border-bottom-color: var(--amarillo);
 }
 
 /* Títulos de sección */
@@ -144,7 +160,7 @@ body {
     margin-bottom: 0.6rem;
 }
 
-.lista-footer i {
+.lista-footer span {
     color: var(--naranja);
 }
 
