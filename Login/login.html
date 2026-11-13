@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar sesión | El Broaster del Chef</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Estilos propios -->
+    <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+
+    <div class="container h-100 d-flex align-items-center justify-content-center">
+        <div class="col-11 col-sm-8 col-md-6 col-lg-4">
+
+            <div class="card tarjeta-login shadow">
+                <div class="card-body p-4">
+
+                    <!-- Logo: coloca tu archivo "logo.png" en esta misma carpeta -->
+                    <div class="text-center mb-3">
+                        <img src="logo.jpg" alt="Logo El Broaster del Chef" class="logo">
+                    </div>
+
+                    <h1 class="titulo text-center mb-1">El Broaster del Chef</h1>
+                    <p class="text-center text-muted mb-4">Acceso administrativo</p>
+
+                    <form>
+                        <div class="mb-3">
+                            <label for="usuario" class="form-label">Nombre de usuario</label>
+                            <input type="text" class="form-control" id="usuario" name="usuario"
+                                   placeholder="Ingresa tu usuario" required>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="contrasena" class="form-label">Contraseña</label>
+                            <input type="password" class="form-control" id="contrasena" name="contrasena"
+                                   placeholder="Ingresa tu contraseña" required>
+                        </div>
+
+                        <button type="submit" class="btn btn-ingresar w-100">Iniciar sesión</button>
+                    </form>
+
+                </div>
+            </div>
+
+            <p class="text-center pie mt-3">&copy; 2026 El Broaster del Chef</p>
+
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
