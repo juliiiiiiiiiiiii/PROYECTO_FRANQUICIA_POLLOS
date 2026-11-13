@@ -9,7 +9,6 @@
 body {
     background-color: #ffffff;
     border-top: 8px solid var(--naranja);
-    border-bottom: 8px solid var(--naranja);
     box-sizing: border-box;
     min-height: 100vh;
 }
@@ -51,15 +50,24 @@ body {
 
 /* Tarjetas de producto */
 .tarjeta-producto {
+    position: relative;
     border: none;
     border-radius: 15px;
     border-top: 5px solid var(--naranja);
+    overflow: hidden;
     transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .tarjeta-producto:hover {
     transform: translateY(-4px);
     border-top-color: var(--rojo);
+}
+
+/* Imagen de producto */
+.imagen-producto {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
 }
 
 /* Nombre del producto */
@@ -86,13 +94,87 @@ body {
     border-radius: 20px;
 }
 
+/* Tarjetas de combo */
+.tarjeta-combo {
+    border-top-color: var(--rojo);
+}
+
+.etiqueta-combo {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 2;
+    background-color: var(--rojo);
+    color: #ffffff;
+    font-size: 0.8rem;
+    font-weight: bold;
+    padding: 4px 12px;
+    border-radius: 20px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
 /* Pie de página */
 .pie-pagina {
-    background-color: #fff7ec;
+    background-color: #2b2b2b;
     border-top: 6px solid var(--rojo);
+    color: #e9e9e9;
+}
+
+.titulo-footer {
+    color: var(--amarillo);
+    font-size: 1.15rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+
+.texto-footer {
+    color: #cfcfcf;
+    font-size: 0.95rem;
+}
+
+.lista-footer {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.lista-footer li {
+    color: #cfcfcf;
+    font-size: 0.95rem;
+    margin-bottom: 0.6rem;
+}
+
+.lista-footer i {
+    color: var(--naranja);
+}
+
+/* Redes sociales */
+.redes-footer a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    margin-right: 8px;
+    border-radius: 50%;
+    background-color: var(--naranja);
+    color: #ffffff;
+    font-size: 1.2rem;
+    text-decoration: none;
+    transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+.redes-footer a:hover {
+    background-color: var(--rojo);
+    transform: translateY(-3px);
+}
+
+.linea-footer {
+    border-color: #555;
+    margin-top: 1.5rem;
 }
 
 .pie {
-    color: #888;
+    color: #999;
     font-size: 0.85rem;
 }
