@@ -1,0 +1,134 @@
+/* Colores de la franquicia */
+:root {
+    --rojo: #d62828;
+    --naranja: #f77f00;
+    --amarillo: #fcbf49;
+}
+
+body {
+    background-color: #ffffff;
+    border-top: 8px solid var(--naranja);
+    min-height: 100vh;
+}
+
+/* Encabezado */
+.encabezado {
+    background-color: #fff7ec;
+    border-bottom: 5px solid var(--rojo);
+    text-align: center;
+    padding: 1.2rem;
+}
+
+.encabezado img {
+    width: 90px;
+    height: 90px;
+    object-fit: contain;
+}
+
+.titulo {
+    color: var(--rojo);
+    font-weight: bold;
+    font-size: 1.6rem;
+    margin: 0.5rem 0 0;
+}
+
+.subtitulo {
+    color: var(--naranja);
+    font-weight: 600;
+    margin: 0;
+}
+
+/* Secciones */
+.seccion {
+    margin-bottom: 2.5rem;
+}
+
+.titulo-seccion {
+    color: var(--rojo);
+    font-weight: bold;
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 3px solid var(--amarillo);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Tablas básicas */
+.tabla {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.tabla th,
+.tabla td {
+    text-align: left;
+    padding: 0.6rem 0.75rem;
+    border-bottom: 1px solid #eee;
+    font-size: 0.95rem;
+}
+
+.tabla th {
+    background-color: #fff7ec;
+    color: var(--rojo);
+    font-weight: 600;
+}
+
+.tabla td {
+    color: #444;
+}
+
+/* Etiquetas de stock */
+.stock-ok,
+.stock-bajo {
+    font-weight: 600;
+    font-size: 0.85rem;
+    padding: 3px 10px;
+    border-radius: 20px;
+}
+
+.stock-ok {
+    background-color: #e5f5f2;
+    color: #2a9d8f;
+}
+
+.stock-bajo {
+    background-color: #fde8e8;
+    color: var(--rojo);
+}
+
+/* Formulario de observaciones */
+.form-observacion label {
+    font-weight: 600;
+    color: #444;
+    margin-bottom: 0.3rem;
+}
+
+.form-observacion .form-control:focus,
+.form-observacion .form-select:focus {
+    border-color: var(--amarillo);
+    box-shadow: 0 0 0 0.2rem rgba(252, 191, 73, 0.4);
+}
+
+.boton-guardar {
+    background-color: var(--naranja);
+    color: #ffffff;
+    font-weight: bold;
+    border: none;
+    padding: 9px 20px;
+    border-radius: 8px;
+}
+
+.boton-guardar:hover {
+    background-color: var(--rojo);
+    color: #ffffff;
+}
+
+/* Pie */
+.pie {
+    text-align: center;
+    color: #999;
+    font-size: 0.85rem;
+    padding: 1.5rem 0;
+}

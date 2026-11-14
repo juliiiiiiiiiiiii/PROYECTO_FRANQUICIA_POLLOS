@@ -160,7 +160,7 @@ body {
     margin-bottom: 0.6rem;
 }
 
-.lista-footer span {
+.lista-footer li .bi {
     color: var(--naranja);
 }
 
