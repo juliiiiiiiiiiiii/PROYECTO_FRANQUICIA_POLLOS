@@ -181,7 +181,7 @@ body {
     font-size: 0.95rem;
 }
 
-.fila-cierre span i {
+.fila-cierre .bi {
     color: var(--naranja);
 }
 

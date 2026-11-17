@@ -1,0 +1,591 @@
+/* Colores de la franquicia */
+:root {
+    --rojo: #d62828;
+    --naranja: #f77f00;
+    --amarillo: #fcbf49;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    background-color: #f5f6f8;
+    border-top: 8px solid var(--naranja);
+}
+
+/* Encabezado */
+.encabezado {
+    background-color: #fff7ec;
+    border-bottom: 5px solid var(--rojo);
+    text-align: center;
+    padding: 1rem;
+}
+
+.encabezado img {
+    width: 70px;
+    height: 70px;
+    object-fit: contain;
+}
+
+.titulo {
+    color: var(--rojo);
+    font-weight: bold;
+    font-size: 1.4rem;
+    margin: 0.4rem 0 0;
+}
+
+.subtitulo {
+    color: var(--naranja);
+    font-weight: 600;
+    margin: 0;
+}
+
+/* Navegación del panel */
+.nav-admin {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px 18px;
+    margin-top: 0.8rem;
+}
+
+.nav-admin a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #444;
+    font-weight: 600;
+    text-decoration: none;
+    padding: 4px 2px;
+    border-bottom: 3px solid transparent;
+}
+
+.nav-admin a .bi {
+    color: var(--naranja);
+}
+
+.nav-admin a:hover,
+.nav-admin a:focus {
+    color: var(--rojo);
+    border-bottom-color: var(--amarillo);
+}
+
+/* Secciones y paneles */
+.seccion {
+    margin-bottom: 2rem;
+    scroll-margin-top: 1rem;
+}
+
+.panel {
+    background-color: #ffffff;
+    border-radius: 12px;
+    border-top: 5px solid var(--naranja);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    padding: 1.3rem;
+}
+
+.panel h2 {
+    color: var(--rojo);
+    font-weight: bold;
+    font-size: 1.15rem;
+    margin: 0 0 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 3px solid var(--amarillo);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Formularios */
+.form-label {
+    font-weight: 600;
+    color: #444;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--amarillo);
+    box-shadow: 0 0 0 0.2rem rgba(252, 191, 73, 0.4);
+}
+
+/* Botones */
+.boton-naranja,
+.boton-rojo,
+.boton-gris {
+    color: #ffffff;
+    font-weight: bold;
+    border: none;
+    padding: 9px 18px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+}
+
+.boton-naranja {
+    background-color: var(--naranja);
+}
+
+.boton-naranja:hover {
+    background-color: var(--rojo);
+    color: #ffffff;
+}
+
+.boton-rojo {
+    background-color: var(--rojo);
+}
+
+.boton-rojo:hover {
+    background-color: #a81e1e;
+    color: #ffffff;
+}
+
+.boton-gris {
+    background-color: #2b2b2b;
+}
+
+.boton-gris:hover {
+    background-color: #000000;
+    color: var(--amarillo);
+}
+
+/* Botón pequeño para tablas y observaciones */
+.boton-sm {
+    padding: 5px 12px;
+    font-size: 0.85rem;
+    gap: 6px;
+}
+
+/* Cierres de caja */
+.tarjeta-cierre {
+    border: 1px solid #eee;
+    border-top: 5px solid var(--rojo);
+    border-radius: 12px;
+    padding: 1rem 1.2rem;
+    height: 100%;
+}
+
+.cabecera-cierre {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.6rem;
+}
+
+.cabecera-cierre h3 {
+    color: var(--rojo);
+    font-weight: bold;
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+.fila-cierre {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.45rem 0;
+    border-bottom: 1px solid #f0f0f0;
+    color: #444;
+    font-size: 0.95rem;
+}
+
+.fila-cierre .bi {
+    color: var(--naranja);
+}
+
+.fila-cierre.total-cierre {
+    border-bottom: none;
+    border-top: 2px dashed #ddd;
+    margin-top: 0.5rem;
+    padding-top: 0.7rem;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: var(--rojo);
+}
+
+.total-dia {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #fff7ec;
+    border: 2px dashed var(--amarillo);
+    border-radius: 10px;
+    padding: 0.8rem 1.2rem;
+    font-weight: bold;
+    color: #5a3a00;
+}
+
+.total-dia strong {
+    color: var(--rojo);
+    font-size: 1.3rem;
+}
+
+/* Etiquetas de estado */
+.estado-ok,
+.estado-pendiente,
+.stock-ok,
+.stock-bajo {
+    font-weight: 600;
+    font-size: 0.8rem;
+    padding: 3px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+}
+
+.estado-ok,
+.stock-ok {
+    background-color: #e5f5f2;
+    color: #2a9d8f;
+}
+
+.estado-pendiente {
+    background-color: #fff3d6;
+    color: #a86400;
+}
+
+.stock-bajo {
+    background-color: #fde8e8;
+    color: var(--rojo);
+}
+
+/* Observaciones del dueño */
+.contador {
+    background-color: var(--rojo);
+    color: #ffffff;
+    font-size: 0.8rem;
+    padding: 3px 10px;
+    border-radius: 20px;
+}
+
+.observacion {
+    border: 1px solid #eee;
+    border-left: 5px solid var(--naranja);
+    border-radius: 10px;
+    padding: 0.9rem 1.1rem;
+    margin-bottom: 0.9rem;
+    color: #444;
+}
+
+.observacion:last-child {
+    margin-bottom: 0;
+}
+
+.observacion.atendida {
+    border-left-color: #2a9d8f;
+    opacity: 0.8;
+}
+
+.cabecera-observacion {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 0.5rem;
+}
+
+.cabecera-observacion small {
+    color: #888;
+}
+
+.tipo-aumento,
+.tipo-despido,
+.tipo-contratacion,
+.tipo-compra {
+    font-weight: bold;
+    font-size: 0.8rem;
+    padding: 3px 10px;
+    border-radius: 20px;
+}
+
+.tipo-aumento {
+    background-color: #e5f5f2;
+    color: #2a9d8f;
+}
+
+.tipo-despido {
+    background-color: #fde8e8;
+    color: var(--rojo);
+}
+
+.tipo-contratacion {
+    background-color: #fff3d6;
+    color: #a86400;
+}
+
+.tipo-compra {
+    background-color: #e8f0fd;
+    color: #2f5fb3;
+}
+
+/* Cupos por cargo */
+.cupo {
+    text-align: center;
+    border: 1px solid #eee;
+    border-top: 4px solid #2a9d8f;
+    border-radius: 10px;
+    padding: 0.8rem;
+    height: 100%;
+}
+
+.cupo.completo {
+    border-top-color: var(--rojo);
+}
+
+.icono-cupo {
+    font-size: 1.5rem;
+    color: var(--naranja);
+}
+
+.nombre-cupo {
+    font-weight: 600;
+    color: #444;
+    margin: 0.2rem 0 0;
+}
+
+.numero-cupo {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: var(--rojo);
+    margin: 0;
+}
+
+.etiqueta-cupo {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #2a9d8f;
+}
+
+.cupo.completo .etiqueta-cupo {
+    color: var(--rojo);
+}
+
+/* Tablas */
+.tabla,
+.tabla-menu {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.tabla th,
+.tabla td,
+.tabla-menu th,
+.tabla-menu td {
+    text-align: left;
+    padding: 0.55rem 0.7rem;
+    border-bottom: 1px solid #eee;
+    font-size: 0.92rem;
+    vertical-align: middle;
+    color: #444;
+}
+
+.tabla th,
+.tabla-menu th {
+    background-color: #fff7ec;
+    color: var(--rojo);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.tabla .text-end,
+.tabla-menu .text-end {
+    text-align: right;
+}
+
+.tabla .text-center,
+.tabla-menu .text-center {
+    text-align: center;
+}
+
+.tabla tfoot td {
+    font-weight: bold;
+    color: var(--rojo);
+    border-top: 2px dashed #ddd;
+    border-bottom: none;
+}
+
+.grupo-tabla {
+    background-color: #fdf0dd;
+    color: var(--naranja) !important;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 0.78rem !important;
+    letter-spacing: 0.4px;
+}
+
+.cargo {
+    background-color: #fff7ec;
+    color: #5a3a00;
+    font-weight: 600;
+    font-size: 0.82rem;
+    padding: 3px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+}
+
+.sueldo {
+    font-weight: 600;
+    color: #5a3a00 !important;
+    white-space: nowrap;
+}
+
+.tabla td.acciones {
+    text-align: center;
+    white-space: nowrap;
+}
+
+.precio-celda {
+    font-weight: 600;
+    color: #5a3a00 !important;
+    white-space: nowrap;
+}
+
+/* Control de cantidad: botón menos, input y botón más */
+.control-cantidad {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.input-cantidad {
+    width: 52px;
+    padding: 4px 6px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    text-align: center;
+}
+
+.boton-cant {
+    width: 30px;
+    height: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 6px;
+    background-color: var(--naranja);
+    color: #ffffff;
+    font-size: 0.9rem;
+    line-height: 1;
+}
+
+.boton-cant:hover {
+    background-color: var(--rojo);
+}
+
+/* Datos del proveedor */
+.datos-proveedor {
+    background-color: #fff7ec;
+    border-radius: 8px;
+    padding: 0.8rem 1rem;
+    color: #444;
+    font-size: 0.92rem;
+}
+
+.datos-proveedor .bi {
+    color: var(--naranja);
+}
+
+/* Factura de compra */
+.factura {
+    background-color: #ffffff;
+    border-radius: 12px;
+    border-top: 5px solid var(--rojo);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    padding: 1.3rem;
+    position: sticky;
+    top: 1rem;
+}
+
+.factura-cabecera {
+    text-align: center;
+    border-bottom: 2px dashed #ddd;
+    padding-bottom: 0.8rem;
+    margin-bottom: 0.8rem;
+}
+
+.factura-cabecera h3 {
+    color: var(--rojo);
+    font-weight: bold;
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+.factura-cabecera small {
+    color: #888;
+}
+
+.tabla-factura {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.tabla-factura th,
+.tabla-factura td {
+    padding: 0.4rem 0.3rem;
+    border-bottom: 1px solid #f0f0f0;
+    text-align: left;
+}
+
+.tabla-factura th {
+    color: #999;
+    font-weight: 600;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+}
+
+.tabla-factura .text-end {
+    text-align: right;
+}
+
+.totales {
+    margin-top: 1rem;
+    border-top: 2px dashed #ddd;
+    padding-top: 0.8rem;
+}
+
+.fila-total {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.35rem;
+    font-size: 0.95rem;
+    color: #444;
+}
+
+.fila-total.grande {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: var(--rojo);
+    border-top: 1px solid #eee;
+    padding-top: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+/* Modales */
+.modal-admin {
+    border-radius: 12px;
+    border-top: 6px solid var(--rojo);
+}
+
+.modal-admin .modal-title {
+    color: var(--rojo);
+    font-weight: bold;
+}
+
+.nota {
+    color: #a86400;
+    background-color: #fff3d6;
+    border-radius: 8px;
+    padding: 0.6rem 0.8rem;
+    font-size: 0.88rem;
+}
+
+/* Pie */
+.pie {
+    text-align: center;
+    color: #999;
+    font-size: 0.85rem;
+    padding: 1.5rem 0;
+}
