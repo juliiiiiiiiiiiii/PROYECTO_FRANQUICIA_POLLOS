@@ -6,30 +6,29 @@
 }
 
 body {
-    background-color: #ffffff;
+    background-color: #f5f6f8;
     border-top: 8px solid var(--naranja);
-    min-height: 100vh;
 }
 
-/* Encabezado */
+/* ===== Encabezado ===== */
 .encabezado {
     background-color: #fff7ec;
     border-bottom: 5px solid var(--rojo);
     text-align: center;
-    padding: 1.2rem;
+    padding: 1rem;
 }
 
 .encabezado img {
-    width: 90px;
-    height: 90px;
+    width: 70px;
+    height: 70px;
     object-fit: contain;
 }
 
 .titulo {
     color: var(--rojo);
     font-weight: bold;
-    font-size: 1.6rem;
-    margin: 0.5rem 0 0;
+    font-size: 1.4rem;
+    margin: 0.4rem 0 0;
 }
 
 .subtitulo {
@@ -38,24 +37,227 @@ body {
     margin: 0;
 }
 
-/* Secciones */
-.seccion {
-    margin-bottom: 2.5rem;
+/* Identificación del usuario (rol dueño) */
+.rol-usuario {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 0.7rem;
+    background-color: #ffffff;
+    border: 1px solid var(--amarillo);
+    border-radius: 8px;
+    padding: 5px 14px;
+    font-size: 0.9rem;
+    color: #444;
 }
 
-.titulo-seccion {
+.rol-usuario strong {
+    color: var(--rojo);
+}
+
+/* ===== Navegación por pestañas ===== */
+.nav-dueno {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 1rem;
+}
+
+.nav-dueno .nav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #ffffff;
+    border: 1px solid #e3e3e3;
+    border-radius: 8px;
+    color: #555;
+    font-weight: 600;
+    font-size: 0.9rem;
+    padding: 8px 16px;
+}
+
+.nav-dueno .nav-link:hover {
+    color: var(--rojo);
+    border-color: var(--amarillo);
+}
+
+.nav-dueno .nav-link.active {
+    background-color: var(--naranja);
+    border-color: var(--naranja);
+    color: #ffffff;
+}
+
+/* ===== Tarjetas de indicadores ===== */
+.tarjeta-indicador {
+    background-color: #ffffff;
+    border-radius: 12px;
+    border-top: 5px solid var(--naranja);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    padding: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    height: 100%;
+}
+
+.icono-indicador {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    color: #fff;
+    flex-shrink: 0;
+    background-color: var(--rojo);
+}
+
+.icono-indicador.naranja { background-color: var(--naranja); }
+.icono-indicador.amarillo { background-color: var(--amarillo); color: #5a3a00; }
+.icono-indicador.verde   { background-color: #2a9d8f; }
+
+.tarjeta-indicador .valor {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: #333;
+    margin: 0;
+    line-height: 1.1;
+}
+
+.tarjeta-indicador .etiqueta {
+    color: #888;
+    font-size: 0.85rem;
+    margin: 0;
+}
+
+/* ===== Mi cuenta: tarjeta de saldo destacada ===== */
+.tarjeta-saldo {
+    background: linear-gradient(135deg, var(--naranja), var(--rojo));
+    color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+    padding: 1.3rem;
+    height: 100%;
+}
+
+.tarjeta-saldo .etiqueta {
+    font-size: 0.9rem;
+    opacity: 0.95;
+    margin: 0;
+}
+
+.tarjeta-saldo .monto {
+    font-size: 1.9rem;
+    font-weight: bold;
+    margin: 0.3rem 0 0.2rem;
+}
+
+.tarjeta-saldo small {
+    opacity: 0.85;
+}
+
+/* Montos de movimientos */
+.monto-ingreso { color: #2a9d8f; font-weight: 600; white-space: nowrap; }
+.monto-egreso  { color: var(--rojo); font-weight: 600; white-space: nowrap; }
+
+/* ===== Filas de dato (ventas por cajero) ===== */
+.fila-dato {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #f0f0f0;
+    color: #444;
+    font-size: 0.95rem;
+}
+
+.fila-dato strong {
+    color: #333;
+}
+
+.fila-dato.total {
+    border-bottom: none;
+    border-top: 2px dashed #ddd;
+    margin-top: 0.5rem;
+    padding-top: 0.7rem;
+    font-size: 1.15rem;
+    color: var(--rojo);
+}
+
+.fila-dato.total strong {
+    color: var(--rojo);
+}
+
+/* ===== Paneles ===== */
+.panel {
+    background-color: #ffffff;
+    border-radius: 12px;
+    border-top: 5px solid var(--naranja);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    padding: 1.3rem;
+}
+
+.panel-cabecera {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 3px solid var(--amarillo);
+}
+
+.panel-cabecera h2 {
     color: var(--rojo);
     font-weight: bold;
-    font-size: 1.3rem;
-    margin-bottom: 1rem;
-    padding-bottom: 0.4rem;
-    border-bottom: 3px solid var(--amarillo);
+    font-size: 1.15rem;
+    margin: 0;
     display: flex;
     align-items: center;
     gap: 8px;
 }
 
-/* Tablas básicas */
+/* ===== Botones ===== */
+.boton-naranja {
+    background-color: var(--naranja);
+    color: #ffffff;
+    font-weight: bold;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+}
+
+.boton-naranja:hover {
+    background-color: var(--rojo);
+    color: #ffffff;
+}
+
+.boton-rojo {
+    background-color: var(--rojo);
+    color: #ffffff;
+    font-weight: bold;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+}
+
+.boton-rojo:hover {
+    background-color: #a81e1e;
+    color: #ffffff;
+}
+
+/* ===== Tablas ===== */
 .tabla {
     width: 100%;
     border-collapse: collapse;
@@ -66,7 +268,8 @@ body {
     text-align: left;
     padding: 0.6rem 0.75rem;
     border-bottom: 1px solid #eee;
-    font-size: 0.95rem;
+    font-size: 0.92rem;
+    vertical-align: middle;
 }
 
 .tabla th {
@@ -79,53 +282,69 @@ body {
     color: #444;
 }
 
-/* Etiquetas de stock */
-.stock-ok,
-.stock-bajo {
+/* Etiquetas de estado */
+.estado {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     font-weight: 600;
-    font-size: 0.85rem;
+    font-size: 0.82rem;
     padding: 3px 10px;
     border-radius: 20px;
 }
 
-.stock-ok {
-    background-color: #e5f5f2;
-    color: #2a9d8f;
-}
+.estado-ok   { background-color: #e5f5f2; color: #2a9d8f; }
+.estado-bajo { background-color: #fde8e8; color: var(--rojo); }
 
-.stock-bajo {
-    background-color: #fde8e8;
-    color: var(--rojo);
-}
-
-/* Formulario de observaciones */
-.form-observacion label {
+/* ===== Formularios ===== */
+.form-label {
     font-weight: 600;
     color: #444;
-    margin-bottom: 0.3rem;
 }
 
-.form-observacion .form-control:focus,
-.form-observacion .form-select:focus {
+.form-control:focus,
+.form-select:focus {
     border-color: var(--amarillo);
     box-shadow: 0 0 0 0.2rem rgba(252, 191, 73, 0.4);
 }
 
-.boton-guardar {
-    background-color: var(--naranja);
-    color: #ffffff;
+/* ===== Observaciones registradas ===== */
+.lista-observaciones {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0 0;
+}
+
+.lista-observaciones li {
+    border-left: 4px solid var(--naranja);
+    background-color: #fafafa;
+    border-radius: 6px;
+    padding: 0.6rem 0.9rem;
+    margin-bottom: 0.6rem;
+}
+
+.lista-observaciones .meta {
+    font-size: 0.8rem;
+    color: #999;
+}
+
+.lista-observaciones .empleado {
+    font-weight: 600;
+    color: var(--rojo);
+}
+
+/* ===== Modal ===== */
+.modal-dueno {
+    border-radius: 12px;
+    border-top: 6px solid var(--rojo);
+}
+
+.modal-dueno .modal-title {
+    color: var(--rojo);
     font-weight: bold;
-    border: none;
-    padding: 9px 20px;
-    border-radius: 8px;
 }
 
-.boton-guardar:hover {
-    background-color: var(--rojo);
-    color: #ffffff;
-}
-
-/* Pie */
+/* ===== Pie ===== */
 .pie {
     text-align: center;
     color: #999;
