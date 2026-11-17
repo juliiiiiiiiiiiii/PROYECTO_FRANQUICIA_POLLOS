@@ -16,6 +16,15 @@
         <img src="../Recursos/logo.jpg" alt="Logo El Broaster del Chef">
         <h1 class="titulo">Caja - Registro de ventas</h1>
         <p class="subtitulo">El Broaster del Chef</p>
+
+        <!-- Selector de cajero: una sola página sirve para los 2 cajeros -->
+        <div class="selector-cajero">
+            <label for="cajeroActivo"><i class="bi bi-person-badge me-1"></i>Cajero en turno:</label>
+            <select class="form-select form-select-sm" id="cajeroActivo">
+                <option value="Cajero 1">Cajero 1</option>
+                <option value="Cajero 2">Cajero 2</option>
+            </select>
+        </div>
     </header>
 
     <main class="container py-4">
@@ -55,13 +64,17 @@
                             <label for="telefonoCliente" class="form-label">Teléfono</label>
                             <input type="text" class="form-control" id="telefonoCliente" placeholder="Ej: 311 000 0000">
                         </div>
-                        <div class="col-12 col-md-8">
+                        <div class="col-12 col-md-6">
                             <label for="direccionCliente" class="form-label">Dirección</label>
                             <input type="text" class="form-control" id="direccionCliente" placeholder="Dirección (opcional)">
                         </div>
-                        <div class="col-12 col-md-4">
+                        <div class="col-12 col-md-6">
                             <label for="correoCliente" class="form-label">Correo</label>
                             <input type="email" class="form-control" id="correoCliente" placeholder="correo@ejemplo.com">
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label for="cumpleCliente" class="form-label">Fecha de cumpleaños</label>
+                            <input type="date" class="form-control" id="cumpleCliente">
                         </div>
                         <div class="col-12">
                             <button type="button" class="boton-naranja">
@@ -82,114 +95,188 @@
                                 <tr>
                                     <th>Producto</th>
                                     <th>Precio</th>
-                                    <th>Cantidad</th>
-                                    <th></th>
+                                    <th class="text-center">Cantidad</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <!-- Pollo broaster -->
-                                <tr><td colspan="4" class="grupo-menu">Pollo broaster</td></tr>
+                                <tr><td colspan="3" class="grupo-menu">Pollo broaster</td></tr>
                                 <tr>
                                     <td>Broaster 8 presas</td>
                                     <td class="precio-celda">$ 50.000</td>
-                                    <td><input type="number" class="input-cantidad" min="0" value="0"></td>
-                                    <td><button type="button" class="boton-naranja"><i class="bi bi-plus-lg"></i></button></td>
+                                    <td>
+                                        <div class="control-cantidad">
+                                            <button type="button" class="boton-cant" aria-label="Restar"><i class="bi bi-dash-lg"></i></button>
+                                            <input type="text" class="input-cantidad" value="0" inputmode="numeric">
+                                            <button type="button" class="boton-cant" aria-label="Sumar"><i class="bi bi-plus-lg"></i></button>
+                                        </div>
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td>Broaster 4 presas</td>
                                     <td class="precio-celda">$ 28.000</td>
-                                    <td><input type="number" class="input-cantidad" min="0" value="0"></td>
-                                    <td><button type="button" class="boton-naranja"><i class="bi bi-plus-lg"></i></button></td>
+                                    <td>
+                                        <div class="control-cantidad">
+                                            <button type="button" class="boton-cant" aria-label="Restar"><i class="bi bi-dash-lg"></i></button>
+                                            <input type="text" class="input-cantidad" value="0" inputmode="numeric">
+                                            <button type="button" class="boton-cant" aria-label="Sumar"><i class="bi bi-plus-lg"></i></button>
+                                        </div>
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td>Alitas broaster</td>
                                     <td class="precio-celda">$ 22.000</td>
-                                    <td><input type="number" class="input-cantidad" min="0" value="0"></td>
-                                    <td><button type="button" class="boton-naranja"><i class="bi bi-plus-lg"></i></button></td>
+                                    <td>
+                                        <div class="control-cantidad">
+                                            <button type="button" class="boton-cant" aria-label="Restar"><i class="bi bi-dash-lg"></i></button>
+                                            <input type="text" class="input-cantidad" value="0" inputmode="numeric">
+                                            <button type="button" class="boton-cant" aria-label="Sumar"><i class="bi bi-plus-lg"></i></button>
+                                        </div>
+                                    </td>
                                 </tr>
 
                                 <!-- Pollos a la brasa -->
-                                <tr><td colspan="4" class="grupo-menu">Pollos a la brasa</td></tr>
+                                <tr><td colspan="3" class="grupo-menu">Pollos a la brasa</td></tr>
                                 <tr>
                                     <td>Pollo entero</td>
                                     <td class="precio-celda">$ 52.000</td>
-                                    <td><input type="number" class="input-cantidad" min="0" value="0"></td>
-                                    <td><button type="button" class="boton-naranja"><i class="bi bi-plus-lg"></i></button></td>
+                                    <td>
+                                        <div class="control-cantidad">
+                                            <button type="button" class="boton-cant" aria-label="Restar"><i class="bi bi-dash-lg"></i></button>
+                                            <input type="text" class="input-cantidad" value="0" inputmode="numeric">
+                                            <button type="button" class="boton-cant" aria-label="Sumar"><i class="bi bi-plus-lg"></i></button>
+                                        </div>
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td>Medio pollo</td>
                                     <td class="precio-celda">$ 30.000</td>
-                                    <td><input type="number" class="input-cantidad" min="0" value="0"></td>
-                                    <td><button type="button" class="boton-naranja"><i class="bi bi-plus-lg"></i></button></td>
+                                    <td>
+                                        <div class="control-cantidad">
+                                            <button type="button" class="boton-cant" aria-label="Restar"><i class="bi bi-dash-lg"></i></button>
+                                            <input type="text" class="input-cantidad" value="0" inputmode="numeric">
+                                            <button type="button" class="boton-cant" aria-label="Sumar"><i class="bi bi-plus-lg"></i></button>
+                                        </div>
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td>Cuarto de pollo</td>
                                     <td class="precio-celda">$ 17.000</td>
-                                    <td><input type="number" class="input-cantidad" min="0" value="0"></td>
-                                    <td><button type="button" class="boton-naranja"><i class="bi bi-plus-lg"></i></button></td>
+                                    <td>
+                                        <div class="control-cantidad">
+                                            <button type="button" class="boton-cant" aria-label="Restar"><i class="bi bi-dash-lg"></i></button>
+                                            <input type="text" class="input-cantidad" value="0" inputmode="numeric">
+                                            <button type="button" class="boton-cant" aria-label="Sumar"><i class="bi bi-plus-lg"></i></button>
+                                        </div>
+                                    </td>
                                 </tr>
 
                                 <!-- Complementos -->
-                                <tr><td colspan="4" class="grupo-menu">Complementos</td></tr>
+                                <tr><td colspan="3" class="grupo-menu">Complementos</td></tr>
                                 <tr>
                                     <td>Papas fritas</td>
                                     <td class="precio-celda">$ 8.000</td>
-                                    <td><input type="number" class="input-cantidad" min="0" value="0"></td>
-                                    <td><button type="button" class="boton-naranja"><i class="bi bi-plus-lg"></i></button></td>
+                                    <td>
+                                        <div class="control-cantidad">
+                                            <button type="button" class="boton-cant" aria-label="Restar"><i class="bi bi-dash-lg"></i></button>
+                                            <input type="text" class="input-cantidad" value="0" inputmode="numeric">
+                                            <button type="button" class="boton-cant" aria-label="Sumar"><i class="bi bi-plus-lg"></i></button>
+                                        </div>
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td>Ensalada fresca</td>
                                     <td class="precio-celda">$ 7.000</td>
-                                    <td><input type="number" class="input-cantidad" min="0" value="0"></td>
-                                    <td><button type="button" class="boton-naranja"><i class="bi bi-plus-lg"></i></button></td>
+                                    <td>
+                                        <div class="control-cantidad">
+                                            <button type="button" class="boton-cant" aria-label="Restar"><i class="bi bi-dash-lg"></i></button>
+                                            <input type="text" class="input-cantidad" value="0" inputmode="numeric">
+                                            <button type="button" class="boton-cant" aria-label="Sumar"><i class="bi bi-plus-lg"></i></button>
+                                        </div>
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td>Mollejitas</td>
                                     <td class="precio-celda">$ 10.000</td>
-                                    <td><input type="number" class="input-cantidad" min="0" value="0"></td>
-                                    <td><button type="button" class="boton-naranja"><i class="bi bi-plus-lg"></i></button></td>
+                                    <td>
+                                        <div class="control-cantidad">
+                                            <button type="button" class="boton-cant" aria-label="Restar"><i class="bi bi-dash-lg"></i></button>
+                                            <input type="text" class="input-cantidad" value="0" inputmode="numeric">
+                                            <button type="button" class="boton-cant" aria-label="Sumar"><i class="bi bi-plus-lg"></i></button>
+                                        </div>
+                                    </td>
                                 </tr>
 
                                 <!-- Bebidas -->
-                                <tr><td colspan="4" class="grupo-menu">Bebidas</td></tr>
+                                <tr><td colspan="3" class="grupo-menu">Bebidas</td></tr>
                                 <tr>
                                     <td>Gaseosa personal</td>
                                     <td class="precio-celda">$ 4.500</td>
-                                    <td><input type="number" class="input-cantidad" min="0" value="0"></td>
-                                    <td><button type="button" class="boton-naranja"><i class="bi bi-plus-lg"></i></button></td>
+                                    <td>
+                                        <div class="control-cantidad">
+                                            <button type="button" class="boton-cant" aria-label="Restar"><i class="bi bi-dash-lg"></i></button>
+                                            <input type="text" class="input-cantidad" value="0" inputmode="numeric">
+                                            <button type="button" class="boton-cant" aria-label="Sumar"><i class="bi bi-plus-lg"></i></button>
+                                        </div>
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td>Gaseosa 1.5 L</td>
                                     <td class="precio-celda">$ 8.000</td>
-                                    <td><input type="number" class="input-cantidad" min="0" value="0"></td>
-                                    <td><button type="button" class="boton-naranja"><i class="bi bi-plus-lg"></i></button></td>
+                                    <td>
+                                        <div class="control-cantidad">
+                                            <button type="button" class="boton-cant" aria-label="Restar"><i class="bi bi-dash-lg"></i></button>
+                                            <input type="text" class="input-cantidad" value="0" inputmode="numeric">
+                                            <button type="button" class="boton-cant" aria-label="Sumar"><i class="bi bi-plus-lg"></i></button>
+                                        </div>
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td>Jugo Natural</td>
                                     <td class="precio-celda">$ 6.000</td>
-                                    <td><input type="number" class="input-cantidad" min="0" value="0"></td>
-                                    <td><button type="button" class="boton-naranja"><i class="bi bi-plus-lg"></i></button></td>
+                                    <td>
+                                        <div class="control-cantidad">
+                                            <button type="button" class="boton-cant" aria-label="Restar"><i class="bi bi-dash-lg"></i></button>
+                                            <input type="text" class="input-cantidad" value="0" inputmode="numeric">
+                                            <button type="button" class="boton-cant" aria-label="Sumar"><i class="bi bi-plus-lg"></i></button>
+                                        </div>
+                                    </td>
                                 </tr>
 
                                 <!-- Combos -->
-                                <tr><td colspan="4" class="grupo-menu">Combos</td></tr>
+                                <tr><td colspan="3" class="grupo-menu">Combos</td></tr>
                                 <tr>
                                     <td>Combo Familiar</td>
                                     <td class="precio-celda">$ 68.000</td>
-                                    <td><input type="number" class="input-cantidad" min="0" value="0"></td>
-                                    <td><button type="button" class="boton-naranja"><i class="bi bi-plus-lg"></i></button></td>
+                                    <td>
+                                        <div class="control-cantidad">
+                                            <button type="button" class="boton-cant" aria-label="Restar"><i class="bi bi-dash-lg"></i></button>
+                                            <input type="text" class="input-cantidad" value="0" inputmode="numeric">
+                                            <button type="button" class="boton-cant" aria-label="Sumar"><i class="bi bi-plus-lg"></i></button>
+                                        </div>
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td>Combo Pareja</td>
                                     <td class="precio-celda">$ 40.000</td>
-                                    <td><input type="number" class="input-cantidad" min="0" value="0"></td>
-                                    <td><button type="button" class="boton-naranja"><i class="bi bi-plus-lg"></i></button></td>
+                                    <td>
+                                        <div class="control-cantidad">
+                                            <button type="button" class="boton-cant" aria-label="Restar"><i class="bi bi-dash-lg"></i></button>
+                                            <input type="text" class="input-cantidad" value="0" inputmode="numeric">
+                                            <button type="button" class="boton-cant" aria-label="Sumar"><i class="bi bi-plus-lg"></i></button>
+                                        </div>
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td>Combo Broaster</td>
                                     <td class="precio-celda">$ 64.000</td>
-                                    <td><input type="number" class="input-cantidad" min="0" value="0"></td>
-                                    <td><button type="button" class="boton-naranja"><i class="bi bi-plus-lg"></i></button></td>
+                                    <td>
+                                        <div class="control-cantidad">
+                                            <button type="button" class="boton-cant" aria-label="Restar"><i class="bi bi-dash-lg"></i></button>
+                                            <input type="text" class="input-cantidad" value="0" inputmode="numeric">
+                                            <button type="button" class="boton-cant" aria-label="Sumar"><i class="bi bi-plus-lg"></i></button>
+                                        </div>
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
@@ -206,6 +293,7 @@
                         <small>N.° 0001 · 13/11/2026</small>
                     </div>
 
+                    <p class="mb-1"><strong>Cajero:</strong> <span class="text-muted">Cajero 1</span></p>
                     <p class="mb-1"><strong>Cliente:</strong> <span class="text-muted">(sin registrar)</span></p>
                     <p class="mb-3"><strong>Identificación:</strong> <span class="text-muted">—</span></p>
 
@@ -263,12 +351,81 @@
                         <button type="button" class="boton-rojo justify-content-center">
                             <i class="bi bi-printer"></i>Imprimir factura
                         </button>
+                        <button type="button" class="boton-cerrar justify-content-center" data-bs-toggle="modal" data-bs-target="#modalCierre">
+                            <i class="bi bi-door-closed"></i>Cerrar caja
+                        </button>
                     </div>
                 </div>
             </div>
 
         </div>
     </main>
+
+    <!-- ===== Modal: Cierre de caja / cambio de turno ===== -->
+    <div class="modal fade" id="modalCierre" tabindex="-1" aria-labelledby="tituloCierre" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content modal-cierre">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="tituloCierre">
+                        <i class="bi bi-door-closed me-2"></i>Cierre de caja
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted mb-3">Resumen del turno para el administrador.</p>
+
+                    <div class="fila-cierre">
+                        <span><i class="bi bi-person-badge me-2"></i>Cajero</span>
+                        <strong>Cajero 1</strong>
+                    </div>
+                    <div class="fila-cierre">
+                        <span><i class="bi bi-calendar-event me-2"></i>Fecha</span>
+                        <strong>13/11/2026</strong>
+                    </div>
+                    <div class="fila-cierre">
+                        <span><i class="bi bi-clock-history me-2"></i>Apertura</span>
+                        <strong>08:00 a.m.</strong>
+                    </div>
+                    <div class="fila-cierre">
+                        <span><i class="bi bi-clock me-2"></i>Cierre</span>
+                        <strong>04:00 p.m.</strong>
+                    </div>
+
+                    <hr>
+
+                    <div class="fila-cierre">
+                        <span><i class="bi bi-receipt me-2"></i>N.° de ventas</span>
+                        <strong>42</strong>
+                    </div>
+                    <div class="fila-cierre">
+                        <span><i class="bi bi-cash me-2"></i>Ingresos en efectivo</span>
+                        <strong>$ 850.000</strong>
+                    </div>
+                    <div class="fila-cierre">
+                        <span><i class="bi bi-credit-card me-2"></i>Ingresos con tarjeta</span>
+                        <strong>$ 420.000</strong>
+                    </div>
+                    <div class="fila-cierre">
+                        <span><i class="bi bi-phone me-2"></i>Transferencia / Nequi</span>
+                        <strong>$ 310.000</strong>
+                    </div>
+
+                    <div class="fila-cierre total-cierre">
+                        <span>Total de la jornada</span>
+                        <strong>$ 1.580.000</strong>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="boton-naranja" data-bs-dismiss="modal">
+                        <i class="bi bi-printer"></i>Imprimir cierre
+                    </button>
+                    <button type="button" class="boton-rojo" data-bs-dismiss="modal">
+                        <i class="bi bi-check2-circle"></i>Confirmar cierre
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <footer class="pie">&copy; 2026 El Broaster del Chef</footer>
 
