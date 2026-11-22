@@ -13,13 +13,16 @@ CREATE TABLE Caja (
 -- Cajero
 CREATE TABLE Cajero (
     Id_Cajero INT NOT NULL,
+    Usuario VARCHAR(45) NOT NULL,
+    Contrasena VARCHAR(255) NOT NULL,
     Nombre VARCHAR(100) NOT NULL,
     Fecha_nacimiento DATE NOT NULL,
     Credencial VARCHAR(45) NOT NULL,
     Sueldo_base DECIMAL(10,2) NOT NULL,
     Porcentaje_ganancia DECIMAL(5,2) NOT NULL,
-    Frencuencia_pago ENUM('diario','semanal','quincenal','mensual') NOT NULL,
-    PRIMARY KEY (Id_Cajero)
+    Frecuencia_pago ENUM('diario','semanal','quincenal','mensual') NOT NULL,
+    PRIMARY KEY (Id_Cajero),
+    UNIQUE (Usuario)
 );
 
 -- Cliente
@@ -59,7 +62,7 @@ CREATE TABLE Proveedor (
 -- Dueno
 CREATE TABLE Dueno (
     Usuario VARCHAR(45) NOT NULL,
-    `Contraseña` VARCHAR(255) NOT NULL,
+    Contrasena VARCHAR(255) NOT NULL,
     Nombre_dueno VARCHAR(45) NOT NULL,
     Fecha_nacimiento DATE NOT NULL,
     PRIMARY KEY (Usuario)
@@ -68,7 +71,7 @@ CREATE TABLE Dueno (
 -- Administrativo
 CREATE TABLE Administrativo (
     Usuario VARCHAR(45) NOT NULL,
-    `contraseña` VARCHAR(255) NOT NULL,
+    Contrasena VARCHAR(255) NOT NULL,
     Nombre_administrativo VARCHAR(100) NOT NULL,
     Fecha_nacimiento DATE NOT NULL,
     PRIMARY KEY (Usuario)
