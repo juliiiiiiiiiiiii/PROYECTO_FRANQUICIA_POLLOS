@@ -15,7 +15,7 @@
     <header class="encabezado">
         <img src="../Recursos/logo.jpg" alt="Logo El Broaster del Chef">
         <h1 class="titulo">Panel del Administrador</h1>
-        <p class="subtitulo">El Broaster del Chef</p>
+        <p class="subtitulo">El Broaster del Chef · <span id="nombreAdmin"></span></p>
 
         <!-- Navegación entre secciones del panel -->
         <nav class="nav-admin" aria-label="Secciones del panel">
@@ -24,14 +24,13 @@
             <a href="#empleados"><span class="bi bi-people"></span>Empleados</a>
             <a href="#stock"><span class="bi bi-box-seam"></span>Stock</a>
             <a href="#pedidos"><span class="bi bi-truck"></span>Pedidos a proveedores</a>
+            <a href="#" id="cerrarSesion"><span class="bi bi-box-arrow-right"></span>Cerrar sesión</a>
         </nav>
     </header>
 
     <main class="container py-4">
 
-        <!-- ===================================================== -->
         <!-- ===== Cierres de caja de los cajeros ===== -->
-        <!-- ===================================================== -->
         <section id="cierres" class="seccion">
             <div class="panel">
                 <h2><span class="bi bi-cash-stack"></span>Cierres de caja</h2>
@@ -39,217 +38,49 @@
                 <div class="row g-3 align-items-end mb-4">
                     <div class="col-12 col-md-4">
                         <label for="fechaCierre" class="form-label">Fecha</label>
-                        <input type="date" class="form-control" id="fechaCierre" value="2026-11-13">
+                        <input type="date" class="form-control" id="fechaCierre">
                     </div>
                     <div class="col-12 col-md-8 text-md-end">
-                        <button type="button" class="boton-naranja boton-sm">
+                        <button type="button" class="boton-naranja boton-sm" id="btnConsultarCierres">
                             <span class="bi bi-search"></span>Consultar cierres
                         </button>
                     </div>
                 </div>
 
-                <div class="row g-4">
+                <div class="row g-4" id="tarjetasCierre"></div>
 
-                    <!-- Cierre Cajero 1 -->
-                    <div class="col-12 col-md-6">
-                        <div class="tarjeta-cierre">
-                            <div class="cabecera-cierre">
-                                <h3><span class="bi bi-person-badge me-2"></span>Cajero 1</h3>
-                                <span class="estado-ok">Recibido</span>
-                            </div>
-                            <div class="fila-cierre">
-                                <span><span class="bi bi-person me-2"></span>Responsable</span>
-                                <strong>Lucía Torres</strong>
-                            </div>
-                            <div class="fila-cierre">
-                                <span><span class="bi bi-clock-history me-2"></span>Apertura</span>
-                                <strong>08:00 a.m.</strong>
-                            </div>
-                            <div class="fila-cierre">
-                                <span><span class="bi bi-clock me-2"></span>Cierre</span>
-                                <strong>04:00 p.m.</strong>
-                            </div>
-                            <div class="fila-cierre">
-                                <span><span class="bi bi-receipt me-2"></span>N.° de ventas</span>
-                                <strong>42</strong>
-                            </div>
-                            <div class="fila-cierre">
-                                <span><span class="bi bi-cash me-2"></span>Efectivo</span>
-                                <strong>$ 850.000</strong>
-                            </div>
-                            <div class="fila-cierre">
-                                <span><span class="bi bi-credit-card me-2"></span>Tarjeta</span>
-                                <strong>$ 420.000</strong>
-                            </div>
-                            <div class="fila-cierre">
-                                <span><span class="bi bi-phone me-2"></span>Transferencia / Nequi</span>
-                                <strong>$ 310.000</strong>
-                            </div>
-                            <div class="fila-cierre total-cierre">
-                                <span>Total del turno</span>
-                                <strong>$ 1.580.000</strong>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Cierre Cajero 2 -->
-                    <div class="col-12 col-md-6">
-                        <div class="tarjeta-cierre">
-                            <div class="cabecera-cierre">
-                                <h3><span class="bi bi-person-badge me-2"></span>Cajero 2</h3>
-                                <span class="estado-ok">Recibido</span>
-                            </div>
-                            <div class="fila-cierre">
-                                <span><span class="bi bi-person me-2"></span>Responsable</span>
-                                <strong>Miguel Soto</strong>
-                            </div>
-                            <div class="fila-cierre">
-                                <span><span class="bi bi-clock-history me-2"></span>Apertura</span>
-                                <strong>04:00 p.m.</strong>
-                            </div>
-                            <div class="fila-cierre">
-                                <span><span class="bi bi-clock me-2"></span>Cierre</span>
-                                <strong>11:00 p.m.</strong>
-                            </div>
-                            <div class="fila-cierre">
-                                <span><span class="bi bi-receipt me-2"></span>N.° de ventas</span>
-                                <strong>51</strong>
-                            </div>
-                            <div class="fila-cierre">
-                                <span><span class="bi bi-cash me-2"></span>Efectivo</span>
-                                <strong>$ 980.000</strong>
-                            </div>
-                            <div class="fila-cierre">
-                                <span><span class="bi bi-credit-card me-2"></span>Tarjeta</span>
-                                <strong>$ 530.000</strong>
-                            </div>
-                            <div class="fila-cierre">
-                                <span><span class="bi bi-phone me-2"></span>Transferencia / Nequi</span>
-                                <strong>$ 415.000</strong>
-                            </div>
-                            <div class="fila-cierre total-cierre">
-                                <span>Total del turno</span>
-                                <strong>$ 1.925.000</strong>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-
-                <!-- Total del día (suma de los dos cajeros) -->
                 <div class="total-dia mt-4">
-                    <span><span class="bi bi-calculator me-2"></span>Total del día · 93 ventas</span>
-                    <strong>$ 3.505.000</strong>
+                    <span><span class="bi bi-calculator me-2"></span>Total del día · <span id="ventasDia">0</span> ventas</span>
+                    <strong id="totalDia">$ 0</strong>
                 </div>
             </div>
         </section>
 
-        <!-- ===================================================== -->
         <!-- ===== Observaciones recibidas del dueño ===== -->
-        <!-- ===================================================== -->
         <section id="observaciones" class="seccion">
             <div class="panel">
                 <h2>
                     <span class="bi bi-envelope-paper"></span>Observaciones del dueño
-                    <span class="contador ms-auto">3 pendientes</span>
+                    <span class="contador ms-auto" id="contadorObservaciones">0 pendientes</span>
                 </h2>
                 <p class="text-muted">Según estas observaciones se deciden aumentos, despidos, contrataciones y compras a proveedores.</p>
-
-                <div class="observacion">
-                    <div class="cabecera-observacion">
-                        <span class="tipo-aumento"><span class="bi bi-graph-up-arrow me-1"></span>Aumento</span>
-                        <small>12/11/2026 · Sobre: <strong>Ana Pérez</strong></small>
-                        <span class="estado-pendiente ms-auto">Pendiente</span>
-                    </div>
-                    <p class="mb-2">Excelente atención a los clientes durante el mes. Evaluar un aumento de sueldo.</p>
-                    <button type="button" class="boton-naranja boton-sm">
-                        <span class="bi bi-check2-circle"></span>Marcar como atendida
-                    </button>
-                </div>
-
-                <div class="observacion">
-                    <div class="cabecera-observacion">
-                        <span class="tipo-despido"><span class="bi bi-person-x me-1"></span>Despido</span>
-                        <small>11/11/2026 · Sobre: <strong>Andrés Rojas</strong></small>
-                        <span class="estado-pendiente ms-auto">Pendiente</span>
-                    </div>
-                    <p class="mb-2">Llegadas tarde repetidas y quejas de clientes en el turno de la noche.</p>
-                    <button type="button" class="boton-naranja boton-sm">
-                        <span class="bi bi-check2-circle"></span>Marcar como atendida
-                    </button>
-                </div>
-
-                <div class="observacion">
-                    <div class="cabecera-observacion">
-                        <span class="tipo-contratacion"><span class="bi bi-person-plus me-1"></span>Contratación</span>
-                        <small>10/11/2026 · Sobre: <strong>Cocina</strong></small>
-                        <span class="estado-pendiente ms-auto">Pendiente</span>
-                    </div>
-                    <p class="mb-2">Hace falta un cocinero más para el turno de la noche.</p>
-                    <button type="button" class="boton-naranja boton-sm">
-                        <span class="bi bi-check2-circle"></span>Marcar como atendida
-                    </button>
-                </div>
-
-                <div class="observacion atendida">
-                    <div class="cabecera-observacion">
-                        <span class="tipo-compra"><span class="bi bi-cart me-1"></span>Compra</span>
-                        <small>09/11/2026 · Sobre: <strong>Inventario</strong></small>
-                        <span class="estado-ok ms-auto">Atendida</span>
-                    </div>
-                    <p class="mb-0">Las papas se están acabando. Hacer pedido al proveedor.</p>
-                </div>
+                <div id="listaObservaciones"></div>
             </div>
         </section>
 
-        <!-- ===================================================== -->
         <!-- ===== Empleados ===== -->
-        <!-- ===================================================== -->
         <section id="empleados" class="seccion">
             <div class="panel">
                 <h2><span class="bi bi-people"></span>Empleados</h2>
 
                 <!-- Cupos por cargo: no se puede contratar más allá del límite -->
-                <div class="row g-3 mb-4">
-                    <div class="col-6 col-lg-3">
-                        <div class="cupo completo">
-                            <span class="bi bi-person-badge icono-cupo"></span>
-                            <p class="nombre-cupo">Cajeros</p>
-                            <p class="numero-cupo">2 / 2</p>
-                            <span class="etiqueta-cupo">Cupo completo</span>
-                        </div>
-                    </div>
-                    <div class="col-6 col-lg-3">
-                        <div class="cupo">
-                            <span class="bi bi-cup-hot icono-cupo"></span>
-                            <p class="nombre-cupo">Meseros</p>
-                            <p class="numero-cupo">3 / 4</p>
-                            <span class="etiqueta-cupo">1 disponible</span>
-                        </div>
-                    </div>
-                    <div class="col-6 col-lg-3">
-                        <div class="cupo completo">
-                            <span class="bi bi-stars icono-cupo"></span>
-                            <p class="nombre-cupo">Aseo</p>
-                            <p class="numero-cupo">2 / 2</p>
-                            <span class="etiqueta-cupo">Cupo completo</span>
-                        </div>
-                    </div>
-                    <div class="col-6 col-lg-3">
-                        <div class="cupo">
-                            <span class="bi bi-fire icono-cupo"></span>
-                            <p class="nombre-cupo">Cocineros</p>
-                            <p class="numero-cupo">4 / 5</p>
-                            <span class="etiqueta-cupo">1 disponible</span>
-                        </div>
-                    </div>
-                </div>
+                <div class="row g-3 mb-4" id="cuposCargo"></div>
 
                 <div class="row g-3 align-items-end mb-3">
                     <div class="col-12 col-md-4">
                         <label for="filtroCargo" class="form-label">Filtrar por cargo</label>
                         <select class="form-select" id="filtroCargo">
-                            <option>Todos</option>
+                            <option value="">Todos</option>
                             <option>Cajero</option>
                             <option>Mesero</option>
                             <option>Aseo</option>
@@ -263,152 +94,24 @@
                     </div>
                 </div>
 
+                <div id="mensajeEmpleados" class="mb-3" aria-live="polite"></div>
+
                 <div class="table-responsive">
                     <table class="tabla">
                         <thead>
                             <tr>
                                 <th>Nombre</th>
                                 <th>Cargo</th>
-                                <th>Documento</th>
-                                <th>Ingreso</th>
+                                <th>Fecha de nacimiento</th>
                                 <th class="text-end">Sueldo</th>
                                 <th class="text-center">Acciones</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <!-- Cajeros -->
-                            <tr>
-                                <td>Lucía Torres</td>
-                                <td><span class="cargo">Cajero 1</span></td>
-                                <td>1020304050</td>
-                                <td>15/02/2024</td>
-                                <td class="text-end sueldo">$ 1.800.000</td>
-                                <td class="acciones">
-                                    <button type="button" class="boton-naranja boton-sm" data-bs-toggle="modal" data-bs-target="#modalAumento"><span class="bi bi-graph-up-arrow"></span>Aumento</button>
-                                    <button type="button" class="boton-rojo boton-sm" data-bs-toggle="modal" data-bs-target="#modalDespido"><span class="bi bi-person-x"></span>Despedir</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Miguel Soto</td>
-                                <td><span class="cargo">Cajero 2</span></td>
-                                <td>1032456789</td>
-                                <td>03/06/2024</td>
-                                <td class="text-end sueldo">$ 1.800.000</td>
-                                <td class="acciones">
-                                    <button type="button" class="boton-naranja boton-sm" data-bs-toggle="modal" data-bs-target="#modalAumento"><span class="bi bi-graph-up-arrow"></span>Aumento</button>
-                                    <button type="button" class="boton-rojo boton-sm" data-bs-toggle="modal" data-bs-target="#modalDespido"><span class="bi bi-person-x"></span>Despedir</button>
-                                </td>
-                            </tr>
-
-                            <!-- Meseros -->
-                            <tr>
-                                <td>Ana Pérez</td>
-                                <td><span class="cargo">Mesero</span></td>
-                                <td>1045678912</td>
-                                <td>10/01/2025</td>
-                                <td class="text-end sueldo">$ 1.750.000</td>
-                                <td class="acciones">
-                                    <button type="button" class="boton-naranja boton-sm" data-bs-toggle="modal" data-bs-target="#modalAumento"><span class="bi bi-graph-up-arrow"></span>Aumento</button>
-                                    <button type="button" class="boton-rojo boton-sm" data-bs-toggle="modal" data-bs-target="#modalDespido"><span class="bi bi-person-x"></span>Despedir</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Valentina Gómez</td>
-                                <td><span class="cargo">Mesero</span></td>
-                                <td>1098765432</td>
-                                <td>22/04/2025</td>
-                                <td class="text-end sueldo">$ 1.750.000</td>
-                                <td class="acciones">
-                                    <button type="button" class="boton-naranja boton-sm" data-bs-toggle="modal" data-bs-target="#modalAumento"><span class="bi bi-graph-up-arrow"></span>Aumento</button>
-                                    <button type="button" class="boton-rojo boton-sm" data-bs-toggle="modal" data-bs-target="#modalDespido"><span class="bi bi-person-x"></span>Despedir</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Andrés Rojas</td>
-                                <td><span class="cargo">Mesero</span></td>
-                                <td>1012345678</td>
-                                <td>05/08/2025</td>
-                                <td class="text-end sueldo">$ 1.750.000</td>
-                                <td class="acciones">
-                                    <button type="button" class="boton-naranja boton-sm" data-bs-toggle="modal" data-bs-target="#modalAumento"><span class="bi bi-graph-up-arrow"></span>Aumento</button>
-                                    <button type="button" class="boton-rojo boton-sm" data-bs-toggle="modal" data-bs-target="#modalDespido"><span class="bi bi-person-x"></span>Despedir</button>
-                                </td>
-                            </tr>
-
-                            <!-- Aseo -->
-                            <tr>
-                                <td>Marta Herrera</td>
-                                <td><span class="cargo">Aseo</span></td>
-                                <td>52345678</td>
-                                <td>12/03/2023</td>
-                                <td class="text-end sueldo">$ 1.750.000</td>
-                                <td class="acciones">
-                                    <button type="button" class="boton-naranja boton-sm" data-bs-toggle="modal" data-bs-target="#modalAumento"><span class="bi bi-graph-up-arrow"></span>Aumento</button>
-                                    <button type="button" class="boton-rojo boton-sm" data-bs-toggle="modal" data-bs-target="#modalDespido"><span class="bi bi-person-x"></span>Despedir</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Jorge Castillo</td>
-                                <td><span class="cargo">Aseo</span></td>
-                                <td>79456123</td>
-                                <td>20/09/2024</td>
-                                <td class="text-end sueldo">$ 1.750.000</td>
-                                <td class="acciones">
-                                    <button type="button" class="boton-naranja boton-sm" data-bs-toggle="modal" data-bs-target="#modalAumento"><span class="bi bi-graph-up-arrow"></span>Aumento</button>
-                                    <button type="button" class="boton-rojo boton-sm" data-bs-toggle="modal" data-bs-target="#modalDespido"><span class="bi bi-person-x"></span>Despedir</button>
-                                </td>
-                            </tr>
-
-                            <!-- Cocineros -->
-                            <tr>
-                                <td>José Díaz</td>
-                                <td><span class="cargo">Cocinero</span></td>
-                                <td>80123456</td>
-                                <td>01/02/2022</td>
-                                <td class="text-end sueldo">$ 2.500.000</td>
-                                <td class="acciones">
-                                    <button type="button" class="boton-naranja boton-sm" data-bs-toggle="modal" data-bs-target="#modalAumento"><span class="bi bi-graph-up-arrow"></span>Aumento</button>
-                                    <button type="button" class="boton-rojo boton-sm" data-bs-toggle="modal" data-bs-target="#modalDespido"><span class="bi bi-person-x"></span>Despedir</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Carlos Mejía</td>
-                                <td><span class="cargo">Cocinero</span></td>
-                                <td>1023987654</td>
-                                <td>14/07/2023</td>
-                                <td class="text-end sueldo">$ 2.200.000</td>
-                                <td class="acciones">
-                                    <button type="button" class="boton-naranja boton-sm" data-bs-toggle="modal" data-bs-target="#modalAumento"><span class="bi bi-graph-up-arrow"></span>Aumento</button>
-                                    <button type="button" class="boton-rojo boton-sm" data-bs-toggle="modal" data-bs-target="#modalDespido"><span class="bi bi-person-x"></span>Despedir</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Diana López</td>
-                                <td><span class="cargo">Cocinero</span></td>
-                                <td>1030456123</td>
-                                <td>02/11/2024</td>
-                                <td class="text-end sueldo">$ 2.200.000</td>
-                                <td class="acciones">
-                                    <button type="button" class="boton-naranja boton-sm" data-bs-toggle="modal" data-bs-target="#modalAumento"><span class="bi bi-graph-up-arrow"></span>Aumento</button>
-                                    <button type="button" class="boton-rojo boton-sm" data-bs-toggle="modal" data-bs-target="#modalDespido"><span class="bi bi-person-x"></span>Despedir</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Felipe Vargas</td>
-                                <td><span class="cargo">Cocinero</span></td>
-                                <td>1015678234</td>
-                                <td>18/03/2025</td>
-                                <td class="text-end sueldo">$ 2.200.000</td>
-                                <td class="acciones">
-                                    <button type="button" class="boton-naranja boton-sm" data-bs-toggle="modal" data-bs-target="#modalAumento"><span class="bi bi-graph-up-arrow"></span>Aumento</button>
-                                    <button type="button" class="boton-rojo boton-sm" data-bs-toggle="modal" data-bs-target="#modalDespido"><span class="bi bi-person-x"></span>Despedir</button>
-                                </td>
-                            </tr>
-                        </tbody>
+                        <tbody id="tablaEmpleados"></tbody>
                         <tfoot>
                             <tr>
-                                <td colspan="4">Total nómina mensual (11 empleados)</td>
-                                <td class="text-end">$ 21.450.000</td>
+                                <td colspan="3" id="etiquetaNomina">Total nómina mensual</td>
+                                <td class="text-end" id="totalNomina">$ 0</td>
                                 <td></td>
                             </tr>
                         </tfoot>
@@ -417,16 +120,10 @@
             </div>
         </section>
 
-        <!-- ===================================================== -->
         <!-- ===== Stock de productos en crudo ===== -->
-        <!-- ===================================================== -->
         <section id="stock" class="seccion">
             <div class="panel">
                 <h2><span class="bi bi-box-seam"></span>Stock de productos en crudo</h2>
-                <p class="text-muted">
-                    <span class="bi bi-info-circle me-1"></span>
-                    Productos y proveedores de ejemplo. Se cargarán desde la base de datos.
-                </p>
 
                 <div class="table-responsive">
                     <table class="tabla">
@@ -440,131 +137,13 @@
                                 <th>Proveedor</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <!-- Pollo -->
-                            <tr><td colspan="6" class="grupo-tabla">Pollo</td></tr>
-                            <tr>
-                                <td>Pollo entero crudo</td>
-                                <td>Unidad</td>
-                                <td class="text-end">120</td>
-                                <td class="text-end">60</td>
-                                <td><span class="stock-ok">Suficiente</span></td>
-                                <td>Avícola San Pedro</td>
-                            </tr>
-                            <tr>
-                                <td>Alitas de pollo</td>
-                                <td>Kg</td>
-                                <td class="text-end">12</td>
-                                <td class="text-end">20</td>
-                                <td><span class="stock-bajo">Stock bajo</span></td>
-                                <td>Avícola San Pedro</td>
-                            </tr>
-                            <tr>
-                                <td>Mollejas</td>
-                                <td>Kg</td>
-                                <td class="text-end">8</td>
-                                <td class="text-end">10</td>
-                                <td><span class="stock-bajo">Stock bajo</span></td>
-                                <td>Avícola San Pedro</td>
-                            </tr>
-
-                            <!-- Acompañamientos -->
-                            <tr><td colspan="6" class="grupo-tabla">Acompañamientos</td></tr>
-                            <tr>
-                                <td>Papa</td>
-                                <td>Kg</td>
-                                <td class="text-end">15</td>
-                                <td class="text-end">50</td>
-                                <td><span class="stock-bajo">Stock bajo</span></td>
-                                <td>Distribuidora La Papa</td>
-                            </tr>
-                            <tr>
-                                <td>Verduras para ensalada</td>
-                                <td>Kg</td>
-                                <td class="text-end">18</td>
-                                <td class="text-end">10</td>
-                                <td><span class="stock-ok">Suficiente</span></td>
-                                <td>Fruver La Cosecha</td>
-                            </tr>
-                            <tr>
-                                <td>Fruta para jugos</td>
-                                <td>Kg</td>
-                                <td class="text-end">9</td>
-                                <td class="text-end">15</td>
-                                <td><span class="stock-bajo">Stock bajo</span></td>
-                                <td>Fruver La Cosecha</td>
-                            </tr>
-
-                            <!-- Insumos de cocina -->
-                            <tr><td colspan="6" class="grupo-tabla">Insumos de cocina</td></tr>
-                            <tr>
-                                <td>Aceite vegetal</td>
-                                <td>Litro</td>
-                                <td class="text-end">8</td>
-                                <td class="text-end">20</td>
-                                <td><span class="stock-bajo">Stock bajo</span></td>
-                                <td>Abarrotes El Granero</td>
-                            </tr>
-                            <tr>
-                                <td>Harina para apanar</td>
-                                <td>Kg</td>
-                                <td class="text-end">25</td>
-                                <td class="text-end">10</td>
-                                <td><span class="stock-ok">Suficiente</span></td>
-                                <td>Abarrotes El Granero</td>
-                            </tr>
-                            <tr>
-                                <td>Especias y adobos</td>
-                                <td>Kg</td>
-                                <td class="text-end">6</td>
-                                <td class="text-end">3</td>
-                                <td><span class="stock-ok">Suficiente</span></td>
-                                <td>Abarrotes El Granero</td>
-                            </tr>
-                            <tr>
-                                <td>Salsas y cremas</td>
-                                <td>Galón</td>
-                                <td class="text-end">4</td>
-                                <td class="text-end">3</td>
-                                <td><span class="stock-ok">Suficiente</span></td>
-                                <td>Abarrotes El Granero</td>
-                            </tr>
-                            <tr>
-                                <td>Carbón vegetal</td>
-                                <td>Bulto</td>
-                                <td class="text-end">10</td>
-                                <td class="text-end">5</td>
-                                <td><span class="stock-ok">Suficiente</span></td>
-                                <td>Abarrotes El Granero</td>
-                            </tr>
-
-                            <!-- Bebidas -->
-                            <tr><td colspan="6" class="grupo-tabla">Bebidas</td></tr>
-                            <tr>
-                                <td>Gaseosa personal 500 ml</td>
-                                <td>Unidad</td>
-                                <td class="text-end">80</td>
-                                <td class="text-end">48</td>
-                                <td><span class="stock-ok">Suficiente</span></td>
-                                <td>Bebidas del Sur</td>
-                            </tr>
-                            <tr>
-                                <td>Gaseosa 1.5 L</td>
-                                <td>Unidad</td>
-                                <td class="text-end">30</td>
-                                <td class="text-end">24</td>
-                                <td><span class="stock-ok">Suficiente</span></td>
-                                <td>Bebidas del Sur</td>
-                            </tr>
-                        </tbody>
+                        <tbody id="tablaStock"></tbody>
                     </table>
                 </div>
             </div>
         </section>
 
-        <!-- ===================================================== -->
         <!-- ===== Pedidos a proveedores ===== -->
-        <!-- ===================================================== -->
         <section id="pedidos" class="seccion">
             <div class="row g-4">
 
@@ -574,26 +153,18 @@
                     <div class="panel mb-4">
                         <h2><span class="bi bi-truck"></span>Proveedor</h2>
 
-                        <!-- Placeholder: la lista de proveedores vendrá de la base de datos -->
                         <label for="proveedor" class="form-label">Selecciona el proveedor</label>
-                        <select class="form-select mb-3" id="proveedor">
-                            <option selected>Avícola San Pedro</option>
-                            <option>Distribuidora La Papa</option>
-                            <option>Fruver La Cosecha</option>
-                            <option>Abarrotes El Granero</option>
-                            <option>Bebidas del Sur</option>
-                        </select>
+                        <select class="form-select mb-3" id="proveedor"></select>
 
                         <div class="datos-proveedor">
-                            <p class="mb-1"><span class="bi bi-upc me-2"></span><strong>NIT:</strong> 900.123.456-7</p>
-                            <p class="mb-1"><span class="bi bi-person me-2"></span><strong>Contacto:</strong> Juan Medina</p>
-                            <p class="mb-0"><span class="bi bi-telephone me-2"></span><strong>Teléfono:</strong> 987 654 321</p>
+                            <p class="mb-1"><span class="bi bi-person me-2"></span><strong>Contacto:</strong> <span id="contactoProveedor">—</span></p>
+                            <p class="mb-0"><span class="bi bi-telephone me-2"></span><strong>Teléfono:</strong> <span id="telefonoProveedor">—</span></p>
                         </div>
                     </div>
 
                     <div class="panel">
                         <h2><span class="bi bi-basket"></span>Productos del proveedor</h2>
-                        <p class="text-muted">Indica la cantidad a pedir y agrégala a la factura de compra.</p>
+                        <p class="text-muted">Indica la cantidad a pedir y se agrega a la factura de compra.</p>
 
                         <div class="table-responsive">
                             <table class="tabla-menu">
@@ -605,50 +176,9 @@
                                         <th class="text-center">Cantidad</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>Pollo entero crudo</td>
-                                        <td class="text-end"><span class="stock-ok">120 und</span></td>
-                                        <td class="precio-celda">$ 14.000 / und</td>
-                                        <td>
-                                            <div class="control-cantidad">
-                                                <button type="button" class="boton-cant" aria-label="Restar"><span class="bi bi-dash-lg"></span></button>
-                                                <input type="text" class="input-cantidad" value="50" inputmode="numeric" aria-label="Cantidad de pollo entero">
-                                                <button type="button" class="boton-cant" aria-label="Sumar"><span class="bi bi-plus-lg"></span></button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>Alitas de pollo</td>
-                                        <td class="text-end"><span class="stock-bajo">12 kg</span></td>
-                                        <td class="precio-celda">$ 16.000 / kg</td>
-                                        <td>
-                                            <div class="control-cantidad">
-                                                <button type="button" class="boton-cant" aria-label="Restar"><span class="bi bi-dash-lg"></span></button>
-                                                <input type="text" class="input-cantidad" value="10" inputmode="numeric" aria-label="Cantidad de alitas">
-                                                <button type="button" class="boton-cant" aria-label="Sumar"><span class="bi bi-plus-lg"></span></button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>Mollejas</td>
-                                        <td class="text-end"><span class="stock-bajo">8 kg</span></td>
-                                        <td class="precio-celda">$ 9.000 / kg</td>
-                                        <td>
-                                            <div class="control-cantidad">
-                                                <button type="button" class="boton-cant" aria-label="Restar"><span class="bi bi-dash-lg"></span></button>
-                                                <input type="text" class="input-cantidad" value="5" inputmode="numeric" aria-label="Cantidad de mollejas">
-                                                <button type="button" class="boton-cant" aria-label="Sumar"><span class="bi bi-plus-lg"></span></button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </tbody>
+                                <tbody id="productosProveedor"></tbody>
                             </table>
                         </div>
-
-                        <button type="button" class="boton-naranja mt-3">
-                            <span class="bi bi-cart-plus"></span>Agregar a la factura
-                        </button>
                     </div>
 
                 </div>
@@ -658,12 +188,11 @@
                     <div class="factura">
                         <div class="factura-cabecera">
                             <h3><span class="bi bi-receipt me-1"></span>Factura de compra</h3>
-                            <small>N.° OC-0001 · 13/11/2026</small>
+                            <small><span id="numeroOrden">N.° OC-nueva</span> · <span id="fechaOrden"></span></small>
                         </div>
 
-                        <p class="mb-1"><strong>Proveedor:</strong> <span class="text-muted">Avícola San Pedro</span></p>
-                        <p class="mb-1"><strong>NIT:</strong> <span class="text-muted">900.123.456-7</span></p>
-                        <p class="mb-3"><strong>Solicitado por:</strong> <span class="text-muted">Administrador</span></p>
+                        <p class="mb-1"><strong>Proveedor:</strong> <span class="text-muted" id="ordenProveedor">—</span></p>
+                        <p class="mb-3"><strong>Solicitado por:</strong> <span class="text-muted" id="ordenSolicita">—</span></p>
 
                         <table class="tabla-factura">
                             <thead>
@@ -673,58 +202,34 @@
                                     <th class="text-end">Subtotal</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                <!-- Ejemplo de líneas agregadas a la factura -->
-                                <tr>
-                                    <td>Pollo entero crudo</td>
-                                    <td class="text-end">50</td>
-                                    <td class="text-end">$ 700.000</td>
-                                </tr>
-                                <tr>
-                                    <td>Alitas de pollo (kg)</td>
-                                    <td class="text-end">10</td>
-                                    <td class="text-end">$ 160.000</td>
-                                </tr>
-                                <tr>
-                                    <td>Mollejas (kg)</td>
-                                    <td class="text-end">5</td>
-                                    <td class="text-end">$ 45.000</td>
-                                </tr>
-                            </tbody>
+                            <tbody id="lineasCompra"></tbody>
                         </table>
 
                         <div class="totales">
                             <div class="fila-total">
                                 <span>Subtotal</span>
-                                <span>$ 905.000</span>
+                                <span id="subtotalCompra">$ 0</span>
                             </div>
                             <div class="fila-total">
-                                <span>IVA (19%)</span>
-                                <span>$ 171.950</span>
+                                <span id="etiquetaIvaCompra">IVA</span>
+                                <span id="ivaCompra">$ 0</span>
                             </div>
                             <div class="fila-total grande">
                                 <span>Total</span>
-                                <span>$ 1.076.950</span>
+                                <span id="totalCompra">$ 0</span>
                             </div>
                         </div>
 
-                        <div class="mt-3">
-                            <label for="pagoProveedor" class="form-label">Forma de pago</label>
-                            <select class="form-select mb-3" id="pagoProveedor">
-                                <option>Transferencia</option>
-                                <option>Efectivo</option>
-                                <option>Crédito a 30 días</option>
-                            </select>
-                        </div>
-
-                        <div class="d-grid gap-2">
-                            <button type="button" class="boton-naranja justify-content-center">
+                        <div class="d-grid gap-2 mt-3 no-imprimir">
+                            <button type="button" class="boton-naranja justify-content-center" id="btnRegistrarCompra">
                                 <span class="bi bi-cart-check"></span>Registrar compra
                             </button>
-                            <button type="button" class="boton-rojo justify-content-center">
+                            <button type="button" class="boton-rojo justify-content-center" id="btnImprimirCompra">
                                 <span class="bi bi-printer"></span>Imprimir factura
                             </button>
                         </div>
+
+                        <div class="mt-3 no-imprimir" id="mensajeCompra" aria-live="polite"></div>
                     </div>
                 </div>
 
@@ -748,40 +253,28 @@
                             <input type="text" class="form-control" id="nombreNuevo" placeholder="Nombre del empleado">
                         </div>
                         <div class="col-12 col-md-6">
-                            <label for="documentoNuevo" class="form-label">N.° de documento</label>
-                            <input type="text" class="form-control" id="documentoNuevo" placeholder="Ej: 1020304050">
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <label for="telefonoNuevo" class="form-label">Teléfono</label>
-                            <input type="text" class="form-control" id="telefonoNuevo" placeholder="Ej: 311 000 0000">
+                            <label for="nacimientoNuevo" class="form-label">Fecha de nacimiento</label>
+                            <input type="date" class="form-control" id="nacimientoNuevo">
                         </div>
                         <div class="col-12 col-md-6">
                             <label for="cargoNuevo" class="form-label">Cargo</label>
                             <!-- Los cargos con cupo completo aparecen deshabilitados -->
-                            <select class="form-select" id="cargoNuevo">
-                                <option disabled>Cajero (cupo completo 2/2)</option>
-                                <option>Mesero (3/4)</option>
-                                <option disabled>Aseo (cupo completo 2/2)</option>
-                                <option selected>Cocinero (4/5)</option>
-                            </select>
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <label for="sueldoNuevo" class="form-label">Sueldo</label>
-                            <input type="text" class="form-control" id="sueldoNuevo" placeholder="Ej: 2.200.000">
+                            <select class="form-select" id="cargoNuevo"></select>
                         </div>
                         <div class="col-12">
-                            <label for="ingresoNuevo" class="form-label">Fecha de ingreso</label>
-                            <input type="date" class="form-control" id="ingresoNuevo">
+                            <label for="sueldoNuevo" class="form-label">Sueldo</label>
+                            <input type="text" class="form-control" id="sueldoNuevo" placeholder="Ej: 2.200.000" inputmode="numeric">
                         </div>
                     </div>
                     <p class="nota mt-3 mb-0">
                         <span class="bi bi-exclamation-circle me-1"></span>
                         Límites: 2 cajeros, 4 meseros, 2 de aseo y 5 cocineros.
                     </p>
+                    <div class="mt-3" id="mensajeContratar" aria-live="polite"></div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="boton-gris" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="boton-naranja" data-bs-dismiss="modal"><span class="bi bi-check2-circle"></span>Contratar</button>
+                    <button type="button" class="boton-naranja" id="btnContratar"><span class="bi bi-check2-circle"></span>Contratar</button>
                 </div>
             </div>
         </div>
@@ -798,35 +291,32 @@
                 <div class="modal-body">
                     <div class="fila-cierre">
                         <span><span class="bi bi-person me-2"></span>Empleado</span>
-                        <strong>Ana Pérez</strong>
+                        <strong id="aumentoNombre">—</strong>
                     </div>
                     <div class="fila-cierre">
                         <span><span class="bi bi-briefcase me-2"></span>Cargo</span>
-                        <strong>Mesero</strong>
+                        <strong id="aumentoCargo">—</strong>
                     </div>
                     <div class="fila-cierre mb-3">
                         <span><span class="bi bi-cash me-2"></span>Sueldo actual</span>
-                        <strong>$ 1.750.000</strong>
+                        <strong id="aumentoSueldoActual">—</strong>
                     </div>
 
                     <div class="row g-3">
                         <div class="col-12 col-md-6">
                             <label for="porcentajeAumento" class="form-label">Aumento (%)</label>
-                            <input type="number" class="form-control" id="porcentajeAumento" placeholder="Ej: 10" min="0">
+                            <input type="text" class="form-control" id="porcentajeAumento" placeholder="Ej: 10" inputmode="numeric">
                         </div>
                         <div class="col-12 col-md-6">
                             <label for="sueldoNuevoAumento" class="form-label">Nuevo sueldo</label>
-                            <input type="text" class="form-control" id="sueldoNuevoAumento" placeholder="Ej: 1.925.000">
-                        </div>
-                        <div class="col-12">
-                            <label for="motivoAumento" class="form-label">Motivo</label>
-                            <textarea class="form-control" id="motivoAumento" rows="2" placeholder="Ej: observación del dueño del 12/11/2026"></textarea>
+                            <input type="text" class="form-control" id="sueldoNuevoAumento" placeholder="Ej: 1.925.000" inputmode="numeric">
                         </div>
                     </div>
+                    <div class="mt-3" id="mensajeAumento" aria-live="polite"></div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="boton-gris" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="boton-naranja" data-bs-dismiss="modal"><span class="bi bi-check2-circle"></span>Aplicar aumento</button>
+                    <button type="button" class="boton-naranja" id="btnAplicarAumento"><span class="bi bi-check2-circle"></span>Aplicar aumento</button>
                 </div>
             </div>
         </div>
@@ -843,31 +333,21 @@
                 <div class="modal-body">
                     <div class="fila-cierre">
                         <span><span class="bi bi-person me-2"></span>Empleado</span>
-                        <strong>Andrés Rojas</strong>
+                        <strong id="despidoNombre">—</strong>
                     </div>
                     <div class="fila-cierre mb-3">
                         <span><span class="bi bi-briefcase me-2"></span>Cargo</span>
-                        <strong>Mesero</strong>
+                        <strong id="despidoCargo">—</strong>
                     </div>
-
-                    <div class="row g-3">
-                        <div class="col-12">
-                            <label for="fechaRetiro" class="form-label">Fecha de retiro</label>
-                            <input type="date" class="form-control" id="fechaRetiro">
-                        </div>
-                        <div class="col-12">
-                            <label for="motivoDespido" class="form-label">Motivo</label>
-                            <textarea class="form-control" id="motivoDespido" rows="2" placeholder="Ej: observación del dueño del 11/11/2026"></textarea>
-                        </div>
-                    </div>
-                    <p class="nota mt-3 mb-0">
+                    <p class="nota mb-0">
                         <span class="bi bi-exclamation-triangle me-1"></span>
                         Esta acción retira al empleado de la nómina y libera un cupo en su cargo.
                     </p>
+                    <div class="mt-3" id="mensajeDespido" aria-live="polite"></div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="boton-gris" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="boton-rojo" data-bs-dismiss="modal"><span class="bi bi-person-x"></span>Confirmar despido</button>
+                    <button type="button" class="boton-rojo" id="btnConfirmarDespido"><span class="bi bi-person-x"></span>Confirmar despido</button>
                 </div>
             </div>
         </div>
@@ -876,6 +356,9 @@
     <footer class="pie">&copy; 2026 El Broaster del Chef</footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../Compartido/api.js"></script>
+    <script src="../Compartido/simulacion.js"></script>
+    <script src="administrador.js"></script>
 
 </body>
 </html>

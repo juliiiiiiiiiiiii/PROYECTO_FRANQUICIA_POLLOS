@@ -17,13 +17,14 @@
         <h1 class="titulo">Caja - Registro de ventas</h1>
         <p class="subtitulo">El Broaster del Chef</p>
 
-        <!-- Selector de cajero: una sola página sirve para los 2 cajeros -->
+        <!-- El cajero en turno se toma de la sesión iniciada en el Login -->
         <div class="selector-cajero">
-            <label for="cajeroActivo"><span class="bi bi-person-badge me-1"></span>Cajero en turno:</label>
-            <select class="form-select form-select-sm" id="cajeroActivo">
-                <option value="Cajero 1">Cajero 1</option>
-                <option value="Cajero 2">Cajero 2</option>
-            </select>
+            <span class="etiqueta-cajero"><span class="bi bi-person-badge me-1"></span>Cajero en turno:</span>
+            <strong id="nombreCajero">—</strong>
+            <span class="text-muted" id="turnoCajero"></span>
+            <button type="button" class="boton-salir" id="cerrarSesion">
+                <span class="bi bi-box-arrow-right me-1"></span>Salir
+            </button>
         </div>
     </header>
 
@@ -40,10 +41,10 @@
                     <div class="row g-3 align-items-end mb-3">
                         <div class="col-12 col-md-6">
                             <label for="idCliente" class="form-label">N.° de identificación</label>
-                            <input type="text" class="form-control" id="idCliente" placeholder="Ej: 1020304050">
+                            <input type="text" class="form-control" id="idCliente" placeholder="Ej: 1020304050" inputmode="numeric">
                         </div>
                         <div class="col-12 col-md-6">
-                            <button type="button" class="boton-naranja w-100">
+                            <button type="button" class="boton-naranja w-100" id="btnBuscarCliente">
                                 <span class="bi bi-search"></span>Buscar cliente
                             </button>
                         </div>
@@ -61,33 +62,22 @@
                             <input type="text" class="form-control" id="nombreCliente" placeholder="Nombre del cliente">
                         </div>
                         <div class="col-12 col-md-6">
-                            <label for="telefonoCliente" class="form-label">Teléfono</label>
-                            <input type="text" class="form-control" id="telefonoCliente" placeholder="Ej: 311 000 0000">
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <label for="direccionCliente" class="form-label">Dirección</label>
-                            <input type="text" class="form-control" id="direccionCliente" placeholder="Dirección (opcional)">
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <label for="correoCliente" class="form-label">Correo</label>
-                            <input type="email" class="form-control" id="correoCliente" placeholder="correo@ejemplo.com">
-                        </div>
-                        <div class="col-12 col-md-6">
                             <label for="cumpleCliente" class="form-label">Fecha de cumpleaños</label>
                             <input type="date" class="form-control" id="cumpleCliente">
                         </div>
                         <div class="col-12">
-                            <button type="button" class="boton-naranja">
+                            <button type="button" class="boton-naranja" id="btnRegistrarCliente">
                                 <span class="bi bi-person-plus"></span>Registrar cliente
                             </button>
                         </div>
+                        <div class="col-12" id="mensajeCliente" aria-live="polite"></div>
                     </div>
                 </div>
 
                 <!-- Productos del menú -->
                 <div class="panel">
                     <h2><span class="bi bi-card-list"></span>Productos del menú</h2>
-                    <p class="text-muted">Indica la cantidad y agrega los productos a la factura.</p>
+                    <p class="text-muted">Indica la cantidad y los productos se agregan a la factura.</p>
 
                     <div class="lista-productos">
                         <table class="tabla-menu">
@@ -98,187 +88,7 @@
                                     <th class="text-center">Cantidad</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                <!-- Pollo broaster -->
-                                <tr><td colspan="3" class="grupo-menu">Pollo broaster</td></tr>
-                                <tr>
-                                    <td>Broaster 8 presas</td>
-                                    <td class="precio-celda">$ 50.000</td>
-                                    <td>
-                                        <div class="control-cantidad">
-                                            <button type="button" class="boton-cant" aria-label="Restar"><span class="bi bi-dash-lg"></span></button>
-                                            <input type="text" class="input-cantidad" value="0" inputmode="numeric">
-                                            <button type="button" class="boton-cant" aria-label="Sumar"><span class="bi bi-plus-lg"></span></button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Broaster 4 presas</td>
-                                    <td class="precio-celda">$ 28.000</td>
-                                    <td>
-                                        <div class="control-cantidad">
-                                            <button type="button" class="boton-cant" aria-label="Restar"><span class="bi bi-dash-lg"></span></button>
-                                            <input type="text" class="input-cantidad" value="0" inputmode="numeric">
-                                            <button type="button" class="boton-cant" aria-label="Sumar"><span class="bi bi-plus-lg"></span></button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Alitas broaster</td>
-                                    <td class="precio-celda">$ 22.000</td>
-                                    <td>
-                                        <div class="control-cantidad">
-                                            <button type="button" class="boton-cant" aria-label="Restar"><span class="bi bi-dash-lg"></span></button>
-                                            <input type="text" class="input-cantidad" value="0" inputmode="numeric">
-                                            <button type="button" class="boton-cant" aria-label="Sumar"><span class="bi bi-plus-lg"></span></button>
-                                        </div>
-                                    </td>
-                                </tr>
-
-                                <!-- Pollos a la brasa -->
-                                <tr><td colspan="3" class="grupo-menu">Pollos a la brasa</td></tr>
-                                <tr>
-                                    <td>Pollo entero</td>
-                                    <td class="precio-celda">$ 52.000</td>
-                                    <td>
-                                        <div class="control-cantidad">
-                                            <button type="button" class="boton-cant" aria-label="Restar"><span class="bi bi-dash-lg"></span></button>
-                                            <input type="text" class="input-cantidad" value="0" inputmode="numeric">
-                                            <button type="button" class="boton-cant" aria-label="Sumar"><span class="bi bi-plus-lg"></span></button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Medio pollo</td>
-                                    <td class="precio-celda">$ 30.000</td>
-                                    <td>
-                                        <div class="control-cantidad">
-                                            <button type="button" class="boton-cant" aria-label="Restar"><span class="bi bi-dash-lg"></span></button>
-                                            <input type="text" class="input-cantidad" value="0" inputmode="numeric">
-                                            <button type="button" class="boton-cant" aria-label="Sumar"><span class="bi bi-plus-lg"></span></button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Cuarto de pollo</td>
-                                    <td class="precio-celda">$ 17.000</td>
-                                    <td>
-                                        <div class="control-cantidad">
-                                            <button type="button" class="boton-cant" aria-label="Restar"><span class="bi bi-dash-lg"></span></button>
-                                            <input type="text" class="input-cantidad" value="0" inputmode="numeric">
-                                            <button type="button" class="boton-cant" aria-label="Sumar"><span class="bi bi-plus-lg"></span></button>
-                                        </div>
-                                    </td>
-                                </tr>
-
-                                <!-- Complementos -->
-                                <tr><td colspan="3" class="grupo-menu">Complementos</td></tr>
-                                <tr>
-                                    <td>Papas fritas</td>
-                                    <td class="precio-celda">$ 8.000</td>
-                                    <td>
-                                        <div class="control-cantidad">
-                                            <button type="button" class="boton-cant" aria-label="Restar"><span class="bi bi-dash-lg"></span></button>
-                                            <input type="text" class="input-cantidad" value="0" inputmode="numeric">
-                                            <button type="button" class="boton-cant" aria-label="Sumar"><span class="bi bi-plus-lg"></span></button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Ensalada fresca</td>
-                                    <td class="precio-celda">$ 7.000</td>
-                                    <td>
-                                        <div class="control-cantidad">
-                                            <button type="button" class="boton-cant" aria-label="Restar"><span class="bi bi-dash-lg"></span></button>
-                                            <input type="text" class="input-cantidad" value="0" inputmode="numeric">
-                                            <button type="button" class="boton-cant" aria-label="Sumar"><span class="bi bi-plus-lg"></span></button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Mollejitas</td>
-                                    <td class="precio-celda">$ 10.000</td>
-                                    <td>
-                                        <div class="control-cantidad">
-                                            <button type="button" class="boton-cant" aria-label="Restar"><span class="bi bi-dash-lg"></span></button>
-                                            <input type="text" class="input-cantidad" value="0" inputmode="numeric">
-                                            <button type="button" class="boton-cant" aria-label="Sumar"><span class="bi bi-plus-lg"></span></button>
-                                        </div>
-                                    </td>
-                                </tr>
-
-                                <!-- Bebidas -->
-                                <tr><td colspan="3" class="grupo-menu">Bebidas</td></tr>
-                                <tr>
-                                    <td>Gaseosa personal</td>
-                                    <td class="precio-celda">$ 4.500</td>
-                                    <td>
-                                        <div class="control-cantidad">
-                                            <button type="button" class="boton-cant" aria-label="Restar"><span class="bi bi-dash-lg"></span></button>
-                                            <input type="text" class="input-cantidad" value="0" inputmode="numeric">
-                                            <button type="button" class="boton-cant" aria-label="Sumar"><span class="bi bi-plus-lg"></span></button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Gaseosa 1.5 L</td>
-                                    <td class="precio-celda">$ 8.000</td>
-                                    <td>
-                                        <div class="control-cantidad">
-                                            <button type="button" class="boton-cant" aria-label="Restar"><span class="bi bi-dash-lg"></span></button>
-                                            <input type="text" class="input-cantidad" value="0" inputmode="numeric">
-                                            <button type="button" class="boton-cant" aria-label="Sumar"><span class="bi bi-plus-lg"></span></button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Jugo Natural</td>
-                                    <td class="precio-celda">$ 6.000</td>
-                                    <td>
-                                        <div class="control-cantidad">
-                                            <button type="button" class="boton-cant" aria-label="Restar"><span class="bi bi-dash-lg"></span></button>
-                                            <input type="text" class="input-cantidad" value="0" inputmode="numeric">
-                                            <button type="button" class="boton-cant" aria-label="Sumar"><span class="bi bi-plus-lg"></span></button>
-                                        </div>
-                                    </td>
-                                </tr>
-
-                                <!-- Combos -->
-                                <tr><td colspan="3" class="grupo-menu">Combos</td></tr>
-                                <tr>
-                                    <td>Combo Familiar</td>
-                                    <td class="precio-celda">$ 68.000</td>
-                                    <td>
-                                        <div class="control-cantidad">
-                                            <button type="button" class="boton-cant" aria-label="Restar"><span class="bi bi-dash-lg"></span></button>
-                                            <input type="text" class="input-cantidad" value="0" inputmode="numeric">
-                                            <button type="button" class="boton-cant" aria-label="Sumar"><span class="bi bi-plus-lg"></span></button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Combo Pareja</td>
-                                    <td class="precio-celda">$ 40.000</td>
-                                    <td>
-                                        <div class="control-cantidad">
-                                            <button type="button" class="boton-cant" aria-label="Restar"><span class="bi bi-dash-lg"></span></button>
-                                            <input type="text" class="input-cantidad" value="0" inputmode="numeric">
-                                            <button type="button" class="boton-cant" aria-label="Sumar"><span class="bi bi-plus-lg"></span></button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Combo Broaster</td>
-                                    <td class="precio-celda">$ 64.000</td>
-                                    <td>
-                                        <div class="control-cantidad">
-                                            <button type="button" class="boton-cant" aria-label="Restar"><span class="bi bi-dash-lg"></span></button>
-                                            <input type="text" class="input-cantidad" value="0" inputmode="numeric">
-                                            <button type="button" class="boton-cant" aria-label="Sumar"><span class="bi bi-plus-lg"></span></button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
+                            <tbody id="tablaMenu"></tbody>
                         </table>
                     </div>
                 </div>
@@ -290,12 +100,12 @@
                 <div class="factura">
                     <div class="factura-cabecera">
                         <h3><span class="bi bi-receipt me-1"></span>Factura de venta</h3>
-                        <small>N.° 0001 · 13/11/2026</small>
+                        <small><span id="numeroFactura">N.° nueva</span> · <span id="fechaFactura"></span></small>
                     </div>
 
-                    <p class="mb-1"><strong>Cajero:</strong> <span class="text-muted">Cajero 1</span></p>
-                    <p class="mb-1"><strong>Cliente:</strong> <span class="text-muted">(sin registrar)</span></p>
-                    <p class="mb-3"><strong>Identificación:</strong> <span class="text-muted">—</span></p>
+                    <p class="mb-1"><strong>Cajero:</strong> <span class="text-muted" id="facturaCajero">—</span></p>
+                    <p class="mb-1"><strong>Cliente:</strong> <span class="text-muted" id="facturaCliente">(sin seleccionar)</span></p>
+                    <p class="mb-3"><strong>Identificación:</strong> <span class="text-muted" id="facturaDocumento">—</span></p>
 
                     <table class="tabla-factura">
                         <thead>
@@ -305,56 +115,42 @@
                                 <th class="text-end">Subtotal</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <!-- Ejemplo de líneas agregadas a la factura -->
-                            <tr>
-                                <td>Pollo entero</td>
-                                <td class="text-end">1</td>
-                                <td class="text-end">$ 52.000</td>
-                            </tr>
-                            <tr>
-                                <td>Gaseosa 1.5 L</td>
-                                <td class="text-end">1</td>
-                                <td class="text-end">$ 8.000</td>
-                            </tr>
-                        </tbody>
+                        <tbody id="lineasFactura"></tbody>
                     </table>
 
                     <div class="totales">
                         <div class="fila-total">
                             <span>Subtotal</span>
-                            <span>$ 60.000</span>
+                            <span id="subtotalFactura">$ 0</span>
                         </div>
                         <div class="fila-total">
-                            <span>IVA (8%)</span>
-                            <span>$ 4.800</span>
+                            <span id="etiquetaIva">IVA</span>
+                            <span id="ivaFactura">$ 0</span>
                         </div>
                         <div class="fila-total grande">
                             <span>Total</span>
-                            <span>$ 64.800</span>
+                            <span id="totalFactura">$ 0</span>
                         </div>
                     </div>
 
-                    <div class="mt-3">
+                    <div class="mt-3 no-imprimir">
                         <label for="metodoPago" class="form-label">Método de pago</label>
-                        <select class="form-select mb-3" id="metodoPago">
-                            <option>Efectivo</option>
-                            <option>Tarjeta</option>
-                            <option>Transferencia / Nequi</option>
-                        </select>
+                        <select class="form-select mb-3" id="metodoPago"></select>
                     </div>
 
-                    <div class="d-grid gap-2">
-                        <button type="button" class="boton-naranja justify-content-center">
+                    <div class="d-grid gap-2 no-imprimir">
+                        <button type="button" class="boton-naranja justify-content-center" id="btnRegistrarVenta">
                             <span class="bi bi-cash-coin"></span>Registrar venta
                         </button>
-                        <button type="button" class="boton-rojo justify-content-center">
+                        <button type="button" class="boton-rojo justify-content-center" id="btnImprimir">
                             <span class="bi bi-printer"></span>Imprimir factura
                         </button>
                         <button type="button" class="boton-cerrar justify-content-center" data-bs-toggle="modal" data-bs-target="#modalCierre">
                             <span class="bi bi-door-closed"></span>Cerrar caja
                         </button>
                     </div>
+
+                    <div class="mt-3 no-imprimir" id="mensajeVenta" aria-live="polite"></div>
                 </div>
             </div>
 
@@ -376,47 +172,38 @@
 
                     <div class="fila-cierre">
                         <span><span class="bi bi-person-badge me-2"></span>Cajero</span>
-                        <strong>Cajero 1</strong>
+                        <strong id="cierreCajero">—</strong>
                     </div>
                     <div class="fila-cierre">
                         <span><span class="bi bi-calendar-event me-2"></span>Fecha</span>
-                        <strong>13/11/2026</strong>
+                        <strong id="cierreFecha">—</strong>
                     </div>
                     <div class="fila-cierre">
                         <span><span class="bi bi-clock-history me-2"></span>Apertura</span>
-                        <strong>08:00 a.m.</strong>
+                        <strong id="cierreApertura">—</strong>
                     </div>
                     <div class="fila-cierre">
                         <span><span class="bi bi-clock me-2"></span>Cierre</span>
-                        <strong>04:00 p.m.</strong>
+                        <strong id="cierreHora">—</strong>
                     </div>
 
                     <hr>
 
                     <div class="fila-cierre">
                         <span><span class="bi bi-receipt me-2"></span>N.° de ventas</span>
-                        <strong>42</strong>
+                        <strong id="cierreVentas">0</strong>
                     </div>
-                    <div class="fila-cierre">
-                        <span><span class="bi bi-cash me-2"></span>Ingresos en efectivo</span>
-                        <strong>$ 850.000</strong>
-                    </div>
-                    <div class="fila-cierre">
-                        <span><span class="bi bi-credit-card me-2"></span>Ingresos con tarjeta</span>
-                        <strong>$ 420.000</strong>
-                    </div>
-                    <div class="fila-cierre">
-                        <span><span class="bi bi-phone me-2"></span>Transferencia / Nequi</span>
-                        <strong>$ 310.000</strong>
-                    </div>
+                    <div id="cierrePorMedio"></div>
 
                     <div class="fila-cierre total-cierre">
                         <span>Total de la jornada</span>
-                        <strong>$ 1.580.000</strong>
+                        <strong id="cierreTotal">$ 0</strong>
                     </div>
+
+                    <div class="mt-3" id="mensajeCierre" aria-live="polite"></div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="boton-rojo" data-bs-dismiss="modal">
+                    <button type="button" class="boton-rojo" id="btnConfirmarCierre">
                         <span class="bi bi-check2-circle"></span>Confirmar cierre
                     </button>
                 </div>
@@ -427,6 +214,9 @@
     <footer class="pie">&copy; 2026 El Broaster del Chef</footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../Compartido/api.js"></script>
+    <script src="../Compartido/simulacion.js"></script>
+    <script src="cajero.js"></script>
 
 </body>
 </html>

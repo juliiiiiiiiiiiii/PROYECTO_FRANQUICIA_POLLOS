@@ -49,23 +49,30 @@ body {
     padding: 5px 12px;
 }
 
-.selector-cajero label {
+.etiqueta-cajero {
     font-weight: 600;
     color: var(--rojo);
-    margin: 0;
     font-size: 0.9rem;
 }
 
-.selector-cajero .form-select {
-    width: auto;
-    border: none;
-    font-weight: 600;
+.selector-cajero strong {
     color: #444;
-    padding: 2px 26px 2px 6px;
 }
 
-.selector-cajero .form-select:focus {
-    box-shadow: none;
+.boton-salir {
+    margin-left: 6px;
+    background-color: transparent;
+    border: 1px solid var(--rojo);
+    color: var(--rojo);
+    font-weight: 600;
+    font-size: 0.85rem;
+    padding: 3px 10px;
+    border-radius: 8px;
+}
+
+.boton-salir:hover {
+    background-color: var(--rojo);
+    color: #ffffff;
 }
 
 /* Paneles */
@@ -352,4 +359,28 @@ body {
     color: #999;
     font-size: 0.85rem;
     padding: 1.5rem 0;
+}
+
+/* Impresión: solo se imprime la factura */
+@media print {
+    body * {
+        visibility: hidden;
+    }
+
+    .factura,
+    .factura * {
+        visibility: visible;
+    }
+
+    .factura {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        box-shadow: none;
+    }
+
+    .no-imprimir {
+        display: none !important;
+    }
 }

@@ -19,10 +19,10 @@
 
         <div class="rol-usuario">
             <i class="bi bi-person-badge"></i>
-            <span>Rol: <strong>Dueño / Administrador</strong> · Carlos Ramírez</span>
+            <span>Rol: <strong>Dueño</strong> · <span id="nombreDueno"></span></span>
         </div>
 
-        <!-- Navegación por pestañas: base para agregar funcionalidades -->
+        <!-- Navegación por pestañas -->
         <ul class="nav nav-dueno" id="pestanas" role="tablist">
             <li class="nav-item" role="presentation">
                 <button class="nav-link active" id="tab-resumen" data-bs-toggle="tab" data-bs-target="#resumen" type="button" role="tab">
@@ -54,6 +54,11 @@
                     <i class="bi bi-people-fill"></i>Empleados
                 </button>
             </li>
+            <li class="nav-item">
+                <button class="nav-link" id="cerrarSesion" type="button">
+                    <i class="bi bi-box-arrow-right"></i>Cerrar sesión
+                </button>
+            </li>
         </ul>
     </header>
 
@@ -69,7 +74,7 @@
                         <div class="tarjeta-indicador">
                             <div class="icono-indicador"><i class="bi bi-cash-coin"></i></div>
                             <div>
-                                <p class="valor">$ 1.580.000</p>
+                                <p class="valor" id="resumenVentas">$ 0</p>
                                 <p class="etiqueta">Ventas de hoy</p>
                             </div>
                         </div>
@@ -78,7 +83,7 @@
                         <div class="tarjeta-indicador">
                             <div class="icono-indicador naranja"><i class="bi bi-bag-check-fill"></i></div>
                             <div>
-                                <p class="valor">84</p>
+                                <p class="valor" id="resumenPedidos">0</p>
                                 <p class="etiqueta">Pedidos de hoy</p>
                             </div>
                         </div>
@@ -87,7 +92,7 @@
                         <div class="tarjeta-indicador">
                             <div class="icono-indicador amarillo"><i class="bi bi-receipt"></i></div>
                             <div>
-                                <p class="valor">$ 39.300</p>
+                                <p class="valor" id="resumenTicket">$ 0</p>
                                 <p class="etiqueta">Ticket promedio</p>
                             </div>
                         </div>
@@ -96,7 +101,7 @@
                         <div class="tarjeta-indicador">
                             <div class="icono-indicador verde"><i class="bi bi-people-fill"></i></div>
                             <div>
-                                <p class="valor">13</p>
+                                <p class="valor" id="resumenEmpleados">0</p>
                                 <p class="etiqueta">Empleados activos</p>
                             </div>
                         </div>
@@ -107,7 +112,6 @@
                 <div class="panel">
                     <div class="panel-cabecera">
                         <h2><i class="bi bi-door-closed"></i>Cierres de caja de hoy</h2>
-                        <button type="button" class="boton-naranja"><i class="bi bi-download"></i>Exportar</button>
                     </div>
                     <div class="table-responsive">
                         <table class="tabla">
@@ -118,24 +122,10 @@
                                     <th>Turno</th>
                                     <th>N.° ventas</th>
                                     <th>Ingresos</th>
+                                    <th>Estado</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Caja 1</td>
-                                    <td>Cajero 1</td>
-                                    <td>08:00 a.m. - 04:00 p.m.</td>
-                                    <td>42</td>
-                                    <td>$ 1.580.000</td>
-                                </tr>
-                                <tr>
-                                    <td>Caja 2</td>
-                                    <td>Cajero 2</td>
-                                    <td>04:00 p.m. - 11:00 p.m.</td>
-                                    <td>—</td>
-                                    <td><span class="estado estado-bajo"><i class="bi bi-hourglass-split"></i>Turno abierto</span></td>
-                                </tr>
-                            </tbody>
+                            <tbody id="tablaCierres"></tbody>
                         </table>
                     </div>
                 </div>
@@ -144,21 +134,20 @@
             <!-- ============ MI CUENTA ============ -->
             <div class="tab-pane fade" id="cuenta" role="tabpanel">
 
-                <!-- Tarjetas de dinero -->
                 <div class="row g-3 mb-4">
                     <div class="col-12 col-md-4">
                         <div class="tarjeta-saldo">
                             <p class="etiqueta"><i class="bi bi-wallet2 me-2"></i>Saldo total disponible</p>
-                            <p class="monto">$ 14.320.000</p>
-                            <small>Actualizado hoy</small>
+                            <p class="monto" id="saldoCuenta">$ 0</p>
+                            <small>Estado de cuenta del dueño</small>
                         </div>
                     </div>
                     <div class="col-12 col-md-4">
                         <div class="tarjeta-indicador">
                             <div class="icono-indicador"><i class="bi bi-cash-stack"></i></div>
                             <div>
-                                <p class="valor">$ 3.850.000</p>
-                                <p class="etiqueta">Efectivo en caja fuerte</p>
+                                <p class="valor" id="cuentaEfectivo">$ 0</p>
+                                <p class="etiqueta">Efectivo recibido hoy</p>
                             </div>
                         </div>
                     </div>
@@ -166,18 +155,16 @@
                         <div class="tarjeta-indicador">
                             <div class="icono-indicador naranja"><i class="bi bi-bank"></i></div>
                             <div>
-                                <p class="valor">$ 10.470.000</p>
-                                <p class="etiqueta">Saldo en banco</p>
+                                <p class="valor" id="cuentaElectronico">$ 0</p>
+                                <p class="etiqueta">Tarjeta y transferencias hoy</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Movimientos de la cuenta -->
                 <div class="panel">
                     <div class="panel-cabecera">
-                        <h2><i class="bi bi-arrow-left-right"></i>Movimientos recientes</h2>
-                        <button type="button" class="boton-naranja"><i class="bi bi-download"></i>Exportar</button>
+                        <h2><i class="bi bi-arrow-left-right"></i>Ingresos recientes</h2>
                     </div>
                     <div class="table-responsive">
                         <table class="tabla">
@@ -189,13 +176,7 @@
                                     <th>Monto</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                <tr><td>13/11/2026</td><td>Ingreso ventas Caja 1</td><td><span class="estado estado-ok">Ingreso</span></td><td class="monto-ingreso">+ $ 1.580.000</td></tr>
-                                <tr><td>12/11/2026</td><td>Pago a Avícola San Pedro</td><td><span class="estado estado-bajo">Egreso</span></td><td class="monto-egreso">- $ 2.100.000</td></tr>
-                                <tr><td>12/11/2026</td><td>Ingreso ventas Caja 2</td><td><span class="estado estado-ok">Ingreso</span></td><td class="monto-ingreso">+ $ 980.000</td></tr>
-                                <tr><td>11/11/2026</td><td>Pago de nómina (quincena)</td><td><span class="estado estado-bajo">Egreso</span></td><td class="monto-egreso">- $ 5.400.000</td></tr>
-                                <tr><td>11/11/2026</td><td>Pago servicios (luz y agua)</td><td><span class="estado estado-bajo">Egreso</span></td><td class="monto-egreso">- $ 620.000</td></tr>
-                            </tbody>
+                            <tbody id="tablaMovimientos"></tbody>
                         </table>
                     </div>
                 </div>
@@ -204,46 +185,14 @@
             <!-- ============ VENTAS (ambos cajeros) ============ -->
             <div class="tab-pane fade" id="ventas" role="tabpanel">
 
-                <!-- Comparativa por cajero -->
-                <div class="row g-3 mb-4">
-                    <div class="col-12 col-md-6">
-                        <div class="panel">
-                            <div class="panel-cabecera">
-                                <h2><i class="bi bi-person-badge"></i>Cajero 1</h2>
-                                <span class="estado estado-ok">Turno cerrado</span>
-                            </div>
-                            <div class="fila-dato"><span>Turno</span><strong>08:00 a.m. - 04:00 p.m.</strong></div>
-                            <div class="fila-dato"><span>N.° de ventas</span><strong>42</strong></div>
-                            <div class="fila-dato"><span>Efectivo</span><strong>$ 850.000</strong></div>
-                            <div class="fila-dato"><span>Tarjeta</span><strong>$ 420.000</strong></div>
-                            <div class="fila-dato"><span>Transferencia / Nequi</span><strong>$ 310.000</strong></div>
-                            <div class="fila-dato total"><span>Total Cajero 1</span><strong>$ 1.580.000</strong></div>
-                        </div>
-                    </div>
+                <div class="row g-3 mb-4" id="panelesCajeros"></div>
 
-                    <div class="col-12 col-md-6">
-                        <div class="panel">
-                            <div class="panel-cabecera">
-                                <h2><i class="bi bi-person-badge"></i>Cajero 2</h2>
-                                <span class="estado estado-bajo">Turno abierto</span>
-                            </div>
-                            <div class="fila-dato"><span>Turno</span><strong>04:00 p.m. - 11:00 p.m.</strong></div>
-                            <div class="fila-dato"><span>N.° de ventas</span><strong>18</strong></div>
-                            <div class="fila-dato"><span>Efectivo</span><strong>$ 380.000</strong></div>
-                            <div class="fila-dato"><span>Tarjeta</span><strong>$ 240.000</strong></div>
-                            <div class="fila-dato"><span>Transferencia / Nequi</span><strong>$ 160.000</strong></div>
-                            <div class="fila-dato total"><span>Total Cajero 2</span><strong>$ 780.000</strong></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Total combinado -->
                 <div class="row g-3 mb-4">
                     <div class="col-12 col-md-4">
                         <div class="tarjeta-indicador">
                             <div class="icono-indicador verde"><i class="bi bi-cash-coin"></i></div>
                             <div>
-                                <p class="valor">$ 2.360.000</p>
+                                <p class="valor" id="ventasTotal">$ 0</p>
                                 <p class="etiqueta">Total ventas de hoy (ambos)</p>
                             </div>
                         </div>
@@ -252,7 +201,7 @@
                         <div class="tarjeta-indicador">
                             <div class="icono-indicador naranja"><i class="bi bi-bag-check-fill"></i></div>
                             <div>
-                                <p class="valor">60</p>
+                                <p class="valor" id="ventasPedidos">0</p>
                                 <p class="etiqueta">Pedidos de hoy (ambos)</p>
                             </div>
                         </div>
@@ -261,14 +210,13 @@
                         <div class="tarjeta-indicador">
                             <div class="icono-indicador amarillo"><i class="bi bi-receipt"></i></div>
                             <div>
-                                <p class="valor">$ 39.300</p>
+                                <p class="valor" id="ventasTicket">$ 0</p>
                                 <p class="etiqueta">Ticket promedio</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Detalle de ventas registradas -->
                 <div class="panel">
                     <div class="panel-cabecera">
                         <h2><i class="bi bi-receipt-cutoff"></i>Ventas registradas hoy</h2>
@@ -278,20 +226,13 @@
                             <thead>
                                 <tr>
                                     <th>Factura</th>
-                                    <th>Hora</th>
                                     <th>Cajero</th>
                                     <th>Cliente</th>
                                     <th>Pago</th>
                                     <th>Total</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                <tr><td>0001</td><td>09:15 a.m.</td><td>Cajero 1</td><td>María López</td><td>Efectivo</td><td>$ 64.800</td></tr>
-                                <tr><td>0002</td><td>10:02 a.m.</td><td>Cajero 1</td><td>(sin registrar)</td><td>Tarjeta</td><td>$ 52.000</td></tr>
-                                <tr><td>0003</td><td>12:40 p.m.</td><td>Cajero 1</td><td>Pedro Gómez</td><td>Nequi</td><td>$ 110.000</td></tr>
-                                <tr><td>0043</td><td>04:30 p.m.</td><td>Cajero 2</td><td>Ana Ruiz</td><td>Efectivo</td><td>$ 68.000</td></tr>
-                                <tr><td>0044</td><td>05:10 p.m.</td><td>Cajero 2</td><td>(sin registrar)</td><td>Tarjeta</td><td>$ 40.000</td></tr>
-                            </tbody>
+                            <tbody id="tablaVentas"></tbody>
                         </table>
                     </div>
                 </div>
@@ -302,7 +243,6 @@
                 <div class="panel">
                     <div class="panel-cabecera">
                         <h2><i class="bi bi-truck"></i>Proveedores</h2>
-                        <button type="button" class="boton-naranja"><i class="bi bi-plus-lg"></i>Nuevo proveedor</button>
                     </div>
                     <div class="table-responsive">
                         <table class="tabla">
@@ -314,11 +254,7 @@
                                     <th>Contacto</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                <tr><td>Avícola San Pedro</td><td>Pollo fresco</td><td>987 654 321</td><td>Juan Medina</td></tr>
-                                <tr><td>Distribuidora La Papa</td><td>Papas</td><td>955 112 233</td><td>Rosa Quispe</td></tr>
-                                <tr><td>Bebidas del Sur</td><td>Gaseosas</td><td>944 778 990</td><td>Luis Carrión</td></tr>
-                            </tbody>
+                            <tbody id="tablaProveedores"></tbody>
                         </table>
                     </div>
                 </div>
@@ -333,6 +269,7 @@
                             <i class="bi bi-plus-lg"></i>Agregar insumo
                         </button>
                     </div>
+                    <div id="mensajeInventario" class="mb-3" aria-live="polite"></div>
                     <div class="table-responsive">
                         <table class="tabla">
                             <thead>
@@ -342,12 +279,7 @@
                                     <th>Estado</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                <tr><td>Pollo</td><td>120 unidades</td><td><span class="estado estado-ok">Suficiente</span></td></tr>
-                                <tr><td>Papas</td><td>15 kg</td><td><span class="estado estado-bajo">Stock bajo</span></td></tr>
-                                <tr><td>Gaseosas</td><td>80 botellas</td><td><span class="estado estado-ok">Suficiente</span></td></tr>
-                                <tr><td>Aceite</td><td>8 litros</td><td><span class="estado estado-bajo">Stock bajo</span></td></tr>
-                            </tbody>
+                            <tbody id="tablaInventario"></tbody>
                         </table>
                     </div>
                 </div>
@@ -363,22 +295,18 @@
                             <div class="panel-cabecera">
                                 <h2><i class="bi bi-chat-left-text"></i>Nueva observación</h2>
                             </div>
-                            <form>
+                            <form id="formObservacion" novalidate>
                                 <div class="mb-3">
-                                    <label for="empleado" class="form-label">Empleado</label>
-                                    <select class="form-select" id="empleado">
-                                        <option>Lucía Torres</option>
-                                        <option>Miguel Soto</option>
-                                        <option>Ana Pérez</option>
-                                        <option>José Díaz</option>
-                                    </select>
+                                    <label for="sobreObservacion" class="form-label">Sobre</label>
+                                    <select class="form-select" id="sobreObservacion"></select>
                                 </div>
                                 <div class="mb-3">
                                     <label for="tipoObs" class="form-label">Tipo</label>
                                     <select class="form-select" id="tipoObs">
-                                        <option>Felicitación</option>
-                                        <option>Llamado de atención</option>
-                                        <option>Nota general</option>
+                                        <option>Aumento</option>
+                                        <option>Despido</option>
+                                        <option>Contratación</option>
+                                        <option>Compra</option>
                                     </select>
                                 </div>
                                 <div class="mb-3">
@@ -386,6 +314,7 @@
                                     <textarea class="form-control" id="observacion" rows="3" placeholder="Escribe una observación..."></textarea>
                                 </div>
                                 <button type="submit" class="boton-naranja"><i class="bi bi-save"></i>Guardar observación</button>
+                                <div class="mt-3" id="mensajeObservacion" aria-live="polite"></div>
                             </form>
                         </div>
                     </div>
@@ -396,20 +325,7 @@
                             <div class="panel-cabecera">
                                 <h2><i class="bi bi-journal-text"></i>Observaciones registradas</h2>
                             </div>
-                            <ul class="lista-observaciones">
-                                <li>
-                                    <div class="meta"><span class="empleado">Lucía Torres</span> · Felicitación · 12/11/2026</div>
-                                    Excelente manejo de la caja en hora pico, sin descuadres.
-                                </li>
-                                <li>
-                                    <div class="meta"><span class="empleado">José Díaz</span> · Llamado de atención · 10/11/2026</div>
-                                    Llegó tarde al turno de apertura.
-                                </li>
-                                <li>
-                                    <div class="meta"><span class="empleado">Ana Pérez</span> · Nota general · 08/11/2026</div>
-                                    Solicitó cambio de turno para la próxima semana.
-                                </li>
-                            </ul>
+                            <ul class="lista-observaciones" id="listaObservaciones"></ul>
                         </div>
                     </div>
 
@@ -430,27 +346,38 @@
                 <div class="modal-body">
                     <div class="mb-3">
                         <label for="nombreInsumo" class="form-label">Producto</label>
-                        <input type="text" class="form-control" id="nombreInsumo" placeholder="Ej: Pollo">
+                        <input type="text" class="form-control" id="nombreInsumo" placeholder="Ej: Pimienta">
+                    </div>
+                    <div class="mb-3">
+                        <label for="categoriaInsumo" class="form-label">Categoría</label>
+                        <select class="form-select" id="categoriaInsumo">
+                            <option>Pollo</option>
+                            <option>Acompañamientos</option>
+                            <option>Insumos de cocina</option>
+                            <option>Empaques</option>
+                        </select>
                     </div>
                     <div class="row g-3">
                         <div class="col-7">
                             <label for="cantidadInsumo" class="form-label">Cantidad</label>
-                            <input type="text" class="form-control" id="cantidadInsumo" placeholder="Ej: 120">
+                            <input type="text" class="form-control" id="cantidadInsumo" placeholder="Ej: 120" inputmode="numeric">
                         </div>
                         <div class="col-5">
                             <label for="unidadInsumo" class="form-label">Unidad</label>
                             <select class="form-select" id="unidadInsumo">
-                                <option>unidades</option>
-                                <option>kg</option>
-                                <option>litros</option>
-                                <option>botellas</option>
+                                <option value="und">unidades</option>
+                                <option value="kg">kg</option>
+                                <option value="litro">litros</option>
+                                <option value="galón">galones</option>
+                                <option value="bulto">bultos</option>
                             </select>
                         </div>
                     </div>
+                    <div class="mt-3" id="mensajeInsumo" aria-live="polite"></div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="boton-rojo" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="boton-naranja" data-bs-dismiss="modal"><i class="bi bi-save"></i>Guardar</button>
+                    <button type="button" class="boton-naranja" id="btnGuardarInsumo"><i class="bi bi-save"></i>Guardar</button>
                 </div>
             </div>
         </div>
@@ -459,6 +386,9 @@
     <footer class="pie">&copy; 2026 El Broaster del Chef · Panel administrativo</footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../Compartido/api.js"></script>
+    <script src="../Compartido/simulacion.js"></script>
+    <script src="dueno.js"></script>
 
 </body>
 </html>

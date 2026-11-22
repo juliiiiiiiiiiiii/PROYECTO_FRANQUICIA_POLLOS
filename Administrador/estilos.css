@@ -589,3 +589,27 @@ body {
     font-size: 0.85rem;
     padding: 1.5rem 0;
 }
+
+/* Impresión: solo se imprime la factura de compra */
+@media print {
+    body * {
+        visibility: hidden;
+    }
+
+    .factura,
+    .factura * {
+        visibility: visible;
+    }
+
+    .factura {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        box-shadow: none;
+    }
+
+    .no-imprimir {
+        display: none !important;
+    }
+}

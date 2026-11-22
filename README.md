@@ -4,10 +4,10 @@ Sistema web de gestión para una franquicia de pollo a la brasa y broaster.
 El proyecto simula las distintas pantallas que usarían los diferentes roles del
 negocio (login, cajero, administrador y dueño) además de la carta pública.
 
-Está construido únicamente con **HTML y CSS**, apoyándose en **Bootstrap 5.3.3**
-y **Bootstrap Icons** cargados por CDN. No incluye JavaScript propio ni backend,
-por lo que los datos (ventas, montos, empleados, stock) son de ejemplo y los
-formularios todavía no guardan información.
+Está construido con **HTML, CSS y JavaScript**, apoyándose en **Bootstrap 5.3.3**
+y **Bootstrap Icons** cargados por CDN. El JavaScript envía y pide los datos con
+peticiones GET y POST. Mientras no exista el servidor, esas peticiones las responde
+una simulación en el navegador (ver [JavaScript y API](#javascript-y-api)).
 
 ---
 
@@ -30,22 +30,30 @@ El logo (`Recursos/logo.jpg`) aparece en el encabezado de cada pantalla.
 
 ```
 PROGRAMA_PROYECTO/
-├─ Login/            Inicio de sesión
+├─ Login/                  Inicio de sesión (envía a cada rol a su pantalla)
 │  ├─ login.html
+│  ├─ login.js
 │  └─ estilos.css
-├─ Menu/             Carta pública de productos
+├─ Menu/                   Carta pública de productos (no requiere sesión)
 │  ├─ menu.html
 │  └─ estilos.css
-├─ Cajero/           Punto de venta / caja
+├─ Cajero/                 Punto de venta / caja
 │  ├─ cajero.html
+│  ├─ cajero.js
 │  └─ estilos.css
-├─ Administrador/    Panel operativo del administrador
+├─ Administrador/          Panel operativo del administrador
 │  ├─ administrador.html
+│  ├─ administrador.js
 │  └─ estilos.css
-├─ Dueno/            Panel general del dueño
+├─ Dueno/                  Panel general del dueño
 │  ├─ dueno.html
+│  ├─ dueno.js
 │  └─ estilos.css
-├─ Recursos/         Imágenes del proyecto (logo y fotos del menú)
+├─ Compartido/             JavaScript común a todas las pantallas
+│  ├─ api.js               Configuración, GET/POST, sesión y utilidades
+│  └─ simulacion.js        Servidor simulado mientras no exista el backend
+├─ BaseDeDatos_Proyecto/   Script de tablas, inserts y modelo relacional (MySQL)
+├─ Recursos/               Imágenes del proyecto (logo y fotos del menú)
 └─ README.md
 ```
 
@@ -56,8 +64,8 @@ Cada carpeta tiene su propio `estilos.css` independiente.
 ## Pantallas
 
 ### Login (`Login/login.html`)
-Acceso administrativo. Tarjeta centrada con logo, campos de usuario y contraseña
-y botón de inicio de sesión.
+Tarjeta centrada con logo, campos de usuario y contraseña y botón de inicio de
+sesión. Según la cuenta, abre la pantalla del dueño, del administrador o del cajero.
 
 ### Menú (`Menu/menu.html`)
 Carta pública con barra de navegación por secciones. Los productos se agrupan en
@@ -67,9 +75,9 @@ página con datos de contacto de la empresa y enlaces a redes sociales.
 
 ### Cajero (`Cajero/cajero.html`)
 Punto de venta. Permite:
-- Seleccionar el **cajero en turno** (Cajero 1 / Cajero 2) desde una misma página.
-- **Registrar o buscar al cliente** por número de identificación (nombre,
-  teléfono, dirección, correo y fecha de cumpleaños).
+- Mostrar el **cajero en turno** según la sesión (día o noche) desde una misma página.
+- **Registrar o buscar al cliente** por número de identificación (nombre y fecha
+  de cumpleaños).
 - Elegir productos del menú con control de cantidad (botones **−** y **+**).
 - Armar la **factura** con subtotal, IVA y total, y escoger el método de pago.
 - **Cerrar caja**: abre un resumen de cierre de turno (ventas e ingresos por
@@ -111,15 +119,74 @@ El flujo de información pensado para el negocio es:
 3. El **dueño** ve el panorama general: ventas de ambos cajeros, estado de su
    cuenta y observaciones del personal.
 
-> Nota: al ser un proyecto solo de HTML y CSS, esta comunicación entre pantallas
-> es visual (datos de ejemplo). Para que las acciones de una pantalla se reflejen
-> de verdad en otra haría falta agregar JavaScript (por ejemplo con
-> `localStorage`) o un backend con base de datos.
+Las ventas que registra el cajero aparecen en los cierres del administrador y en
+el panel del dueño. Las observaciones que escribe el dueño le llegan al
+administrador.
 
 ---
 
 ## Cómo usarlo
 
-No requiere instalación ni servidor. Basta con abrir cualquiera de los archivos
-`.html` en un navegador (se recomienda empezar por `Login/login.html`).
+1. Abre la carpeta del proyecto con un servidor local, por ejemplo la extensión
+   **Live Server** (clic derecho en `Login/login.html` > *Open with Live Server*).
+   Abrir los archivos con doble clic también suele funcionar en Chrome, pero
+   algunos navegadores no comparten los datos guardados entre carpetas.
+2. Entra con una de estas cuentas (vienen de `inserts_Proyecto.sql`):
+
+| Rol           | Usuario          | Contraseña      |
+|---------------|------------------|-----------------|
+| Dueño         | `carlos.ramirez` | `Dueno2026*`    |
+| Administrador | `laura.mendez`   | `Admin2026*`    |
+| Cajero día    | `lucia.torres`   | `Cajero1Dia*`   |
+| Cajero noche  | `miguel.soto`    | `Cajero2Noche*` |
+
 Se necesita conexión a internet para cargar Bootstrap y los iconos desde el CDN.
+
+---
+
+## JavaScript y API
+
+`Compartido/api.js` tiene dos funciones que usan todas las pantallas:
+`api.get(ruta)` y `api.post(ruta, datos)`. Los datos viajan en JSON con los
+mismos nombres de columna de `SCRIPT_Proyecto.sql`.
+
+- `USAR_SIMULACION: true` (valor actual): responde `simulacion.js`, que guarda
+  los datos en el `localStorage` del navegador con los registros de los inserts.
+  Para volver a los datos iniciales, ejecuta `Simulacion.reiniciar()` en la
+  consola del navegador y recarga.
+- `USAR_SIMULACION: false`: las peticiones van con `fetch` a `API_URL`
+  (`http://localhost:3000/api`). El servidor que se construya debe responder
+  estas rutas y guardar en MySQL.
+
+| Método | Ruta | Pantalla | Tabla |
+|---|---|---|---|
+| POST | `/login` | Login | Dueno, Administrativo, Cajero |
+| GET | `/medios-pago` | Cajero | Medio_Pago |
+| GET | `/clientes/{id}` | Cajero | Cliente |
+| POST | `/clientes` | Cajero | Cliente |
+| POST | `/ventas` | Cajero | Venta, Detalle_venta |
+| GET | `/ventas?fecha=` | Dueño | Venta, Detalle_venta |
+| GET | `/cierres?fecha=` | Cajero, Administrador, Dueño | Turno_cajero, Venta |
+| POST | `/turnos` | Cajero (cerrar caja) | Turno_cajero |
+| GET | `/cajeros` | Administrador, Dueño | Cajero |
+| POST | `/cajeros/{id}/aumento` | Administrador | Cajero |
+| GET | `/empleados` | Administrador, Dueño | Empleado |
+| POST | `/empleados` | Administrador | Empleado |
+| POST | `/empleados/{id}/aumento` | Administrador | Empleado |
+| POST | `/empleados/{id}/despido` | Administrador | Empleado |
+| GET | `/productos?tipo=` | Administrador, Dueño | Producto, Producto_proveedor |
+| POST | `/productos` | Dueño | Producto |
+| GET | `/proveedores` | Administrador, Dueño | Proveedor, Producto_proveedor |
+| POST | `/ordenes-compra` | Administrador | Orden_compra |
+| GET | `/estado-cuenta?usuario=` | Dueño | Estado_cuenta |
+| GET | `/observaciones` | Administrador, Dueño | *(falta la tabla)* |
+| POST | `/observaciones` | Dueño | *(falta la tabla)* |
+| POST | `/observaciones/{id}/atendida` | Administrador | *(falta la tabla)* |
+
+Datos que la interfaz usa pero que todavía no tienen columna en la base de datos:
+el precio de venta de cada producto (está en `Cajero/cajero.js`), el stock mínimo
+y el precio de compra de los insumos (están en `DATOS_FUERA_DE_BD`, en `api.js`),
+el detalle de las órdenes de compra y las observaciones.
+
+La protección de las pantallas por rol es solo de navegación. Cuando exista el
+servidor, debe validar el usuario en cada petición.
