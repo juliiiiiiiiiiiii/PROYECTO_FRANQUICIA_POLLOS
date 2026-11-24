@@ -1,498 +1,742 @@
-(() => {
-    const cuenta = sesion.exigir('administrativo');
-    if (!cuenta) {
+const IVA_COMPRA = 0.19;
+
+// Máximo de personas por cargo
+const limites = { Cajero: 2, Mesero: 4, Aseo: 2, Cocinero: 5 };
+
+const cargos = [
+    ["Cajero", "Cajeros", "bi-person-badge"],
+    ["Mesero", "Meseros", "bi-cup-hot"],
+    ["Aseo", "Aseo", "bi-stars"],
+    ["Cocinero", "Cocineros", "bi-fire"]
+];
+
+// Clase e ícono de cada tipo de observación
+const tiposObservacion = {
+    "Aumento": ["tipo-aumento", "bi-graph-up-arrow"],
+    "Despido": ["tipo-despido", "bi-person-x"],
+    "Contratación": ["tipo-contratacion", "bi-person-plus"],
+    "Compra": ["tipo-compra", "bi-cart"]
+};
+
+// Datos que la tabla Producto todavía no tiene. Clave = Id_producto.
+const stockMinimo = {
+    10: 48, 11: 24, 16: 60, 17: 20, 18: 10, 19: 50, 20: 10, 21: 15,
+    22: 20, 23: 10, 24: 3, 25: 3, 26: 5, 27: 5, 28: 2, 29: 100
+};
+const precioCompra = {
+    10: 2500, 11: 5000, 16: 14000, 17: 16000, 18: 9000, 19: 2500, 20: 4000, 21: 5000,
+    22: 9000, 23: 3500, 24: 20000, 25: 45000, 26: 30000, 27: 2000, 28: 90000, 29: 600
+};
+
+let admin = JSON.parse(sessionStorage.getItem("usuario"));
+let personal = [];
+let seleccionado = null;
+let proveedores = [];
+let pedido = {};
+let compraRegistrada = false;
+
+// ===== Funciones de apoyo =====
+function formatoPesos(valor) {
+    return "$ " + Math.round(valor).toLocaleString("es-CO");
+}
+
+function soloNumeros(texto) {
+    return Number(String(texto).replace(/\D/g, "")) || 0;
+}
+
+function fechaHoy() {
+    let hoy = new Date();
+    let mes = String(hoy.getMonth() + 1).padStart(2, "0");
+    let dia = String(hoy.getDate()).padStart(2, "0");
+    return `${hoy.getFullYear()}-${mes}-${dia}`;
+}
+
+function fechaCorta(fecha) {
+    let partes = fecha.split("-");
+    return `${partes[2]}/${partes[1]}/${partes[0]}`;
+}
+
+function hora12(hora) {
+    if (!hora) {
+        return "—";
+    }
+    let partes = hora.split(":");
+    let horas = Number(partes[0]);
+    let sufijo = horas >= 12 ? "p.m." : "a.m.";
+    horas = horas % 12 || 12;
+    return `${String(horas).padStart(2, "0")}:${partes[1]} ${sufijo}`;
+}
+
+function mostrarMensaje(id, texto, tipo = "success") {
+    let caja = document.getElementById(id);
+    caja.innerHTML = `<div class="alert alert-${tipo} py-2 mb-0" role="alert"></div>`;
+    caja.firstChild.textContent = texto;
+}
+
+function limpiarMensaje(id) {
+    document.getElementById(id).innerHTML = "";
+}
+
+// "Papa (kg)" -> nombre "Papa" y unidad "kg"
+function separarUnidad(nombreProducto) {
+    let partes = nombreProducto.match(/^(.*)\s\((.+)\)$/);
+    if (partes) {
+        return { nombre: partes[1], unidad: partes[2] };
+    }
+    return { nombre: nombreProducto, unidad: "und" };
+}
+
+// "Juan Medina - 987 654 321" -> nombre y teléfono
+function separarContacto(contacto) {
+    let partes = contacto.split(" - ");
+    return { nombre: partes[0], telefono: partes[1] || "—" };
+}
+
+function stockBajo(producto) {
+    let minimo = stockMinimo[producto.Id_producto];
+    return minimo !== undefined && producto.Stock < minimo;
+}
+
+function iconoMedio(nombre) {
+    if (nombre.startsWith("Efectivo")) {
+        return "bi-cash";
+    }
+    if (nombre.startsWith("Tarjeta")) {
+        return "bi-credit-card";
+    }
+    return "bi-phone";
+}
+
+function abrirModal(id) {
+    bootstrap.Modal.getOrCreateInstance(document.getElementById(id)).show();
+}
+
+function cerrarModal(id) {
+    bootstrap.Modal.getOrCreateInstance(document.getElementById(id)).hide();
+}
+
+// ===== Inicio de la página =====
+function iniciarPagina() {
+    if (!admin || admin.rol !== "administrativo") {
+        window.location.href = "../Login/login.html";
         return;
     }
 
-    const $ = (id) => document.getElementById(id);
-    const esc = util.escapar;
-    const modal = (id) => bootstrap.Modal.getOrCreateInstance($(id));
-
-    const CARGOS = [
-        { cargo: 'Cajero', plural: 'Cajeros', icono: 'bi-person-badge' },
-        { cargo: 'Mesero', plural: 'Meseros', icono: 'bi-cup-hot' },
-        { cargo: 'Aseo', plural: 'Aseo', icono: 'bi-stars' },
-        { cargo: 'Cocinero', plural: 'Cocineros', icono: 'bi-fire' }
-    ];
-
-    const TIPOS_OBSERVACION = {
-        Aumento: ['tipo-aumento', 'bi-graph-up-arrow'],
-        Despido: ['tipo-despido', 'bi-person-x'],
-        'Contratación': ['tipo-contratacion', 'bi-person-plus'],
-        Compra: ['tipo-compra', 'bi-cart']
-    };
-
-    let personal = [];
-    let seleccionado = null;
-    let proveedores = [];
-    const pedido = new Map();
-    let compraRegistrada = false;
-
-    $('nombreAdmin').textContent = cuenta.nombre;
-    $('cerrarSesion').addEventListener('click', (evento) => {
-        evento.preventDefault();
-        sesion.cerrar();
-    });
-    $('fechaCierre').value = util.fechaHoy();
-    $('fechaOrden').textContent = util.fechaCorta(util.fechaHoy());
-    $('ordenSolicita').textContent = cuenta.nombre;
-    $('etiquetaIvaCompra').textContent = `IVA (${CONFIG.IVA_COMPRA * 100}%)`;
+    document.getElementById("nombreAdmin").textContent = admin.nombre;
+    document.getElementById("fechaCierre").value = fechaHoy();
+    document.getElementById("fechaOrden").textContent = fechaCorta(fechaHoy());
+    document.getElementById("ordenSolicita").textContent = admin.nombre;
+    document.getElementById("etiquetaIvaCompra").textContent = `IVA (${IVA_COMPRA * 100}%)`;
 
     cargarCierres();
     cargarObservaciones();
     cargarPersonal();
     cargarStock();
     cargarProveedores();
+}
 
-    // ----- Cierres de caja: GET /cierres -----
-    $('btnConsultarCierres').addEventListener('click', cargarCierres);
+// ===== Cierres de caja =====
+function filaCierre(icono, etiqueta, valor) {
+    return `
+        <div class="fila-cierre">
+            <span><span class="bi ${icono} me-2"></span>${etiqueta}</span>
+            <strong>${valor}</strong>
+        </div>
+    `;
+}
 
-    async function cargarCierres() {
-        const fecha = $('fechaCierre').value || util.fechaHoy();
-        try {
-            const cierres = await api.get(`/cierres?fecha=${fecha}`);
-            $('tarjetasCierre').innerHTML = cierres.map(tarjetaCierre).join('');
-            $('ventasDia').textContent = cierres.reduce((suma, c) => suma + c.Num_ventas, 0);
-            $('totalDia').textContent = util.pesos(cierres.reduce((suma, c) => suma + c.Total, 0));
-        } catch (error) {
-            $('tarjetasCierre').innerHTML = `<div class="col-12">${util.alerta(error.message)}</div>`;
+async function cargarCierres() {
+    let fecha = document.getElementById("fechaCierre").value || fechaHoy();
+    const respuesta = await fetch("/cierres?fecha=" + fecha);
+    const cierres = await respuesta.json();
+
+    let html = "";
+    let totalDia = 0;
+    let ventasDia = 0;
+
+    for (let i = 0; i < cierres.length; i++) {
+        let c = cierres[i];
+        totalDia += c.Total;
+        ventasDia += c.Num_ventas;
+
+        let medios = "";
+        for (let j = 0; j < c.Por_medio.length; j++) {
+            let m = c.Por_medio[j];
+            medios += filaCierre(iconoMedio(m.Medio_pago), m.Medio_pago, formatoPesos(m.Total));
         }
-    }
 
-    function filaCierre(icono, etiqueta, valor) {
-        return `
-            <div class="fila-cierre">
-                <span><span class="bi ${icono} me-2"></span>${etiqueta}</span>
-                <strong>${valor}</strong>
-            </div>`;
-    }
-
-    function tarjetaCierre(c) {
-        return `
+        html += `
             <div class="col-12 col-md-6">
                 <div class="tarjeta-cierre">
                     <div class="cabecera-cierre">
                         <h3><span class="bi bi-person-badge me-2"></span>Cajero ${c.Id_cajero}</h3>
-                        <span class="${c.Cerrado ? 'estado-ok' : 'estado-pendiente'}">${c.Cerrado ? 'Recibido' : 'Turno abierto'}</span>
+                        <span class="${c.Cerrado ? "estado-ok" : "estado-pendiente"}">${c.Cerrado ? "Recibido" : "Turno abierto"}</span>
                     </div>
-                    ${filaCierre('bi-person', 'Responsable', esc(c.Cajero))}
-                    ${filaCierre('bi-clock-history', 'Apertura', util.hora12(c.Hora_inicio))}
-                    ${filaCierre('bi-clock', 'Cierre', c.Cerrado ? util.hora12(c.Hora_fin) : 'Pendiente')}
-                    ${filaCierre('bi-receipt', 'N.° de ventas', c.Num_ventas)}
-                    ${c.Por_medio.map((m) => filaCierre(util.iconoMedio(m.Medio_pago), esc(m.Medio_pago), util.pesos(m.Total))).join('')}
+                    ${filaCierre("bi-person", "Responsable", c.Cajero)}
+                    ${filaCierre("bi-clock-history", "Apertura", hora12(c.Hora_inicio))}
+                    ${filaCierre("bi-clock", "Cierre", c.Cerrado ? hora12(c.Hora_fin) : "Pendiente")}
+                    ${filaCierre("bi-receipt", "N.° de ventas", c.Num_ventas)}
+                    ${medios}
                     <div class="fila-cierre total-cierre">
                         <span>Total del turno</span>
-                        <strong>${util.pesos(c.Total)}</strong>
+                        <strong>${formatoPesos(c.Total)}</strong>
                     </div>
                 </div>
-            </div>`;
+            </div>
+        `;
     }
 
-    // ----- Observaciones: GET /observaciones y POST /observaciones/{id}/atendida -----
-    async function cargarObservaciones() {
-        try {
-            const lista = await api.get('/observaciones');
-            const pendientes = lista.filter((o) => !o.Atendida).length;
-            $('contadorObservaciones').textContent = `${pendientes} pendiente${pendientes === 1 ? '' : 's'}`;
-            $('listaObservaciones').innerHTML = lista.length
-                ? lista.map(tarjetaObservacion).join('')
-                : '<p class="text-muted mb-0">No hay observaciones del dueño.</p>';
-        } catch (error) {
-            $('listaObservaciones').innerHTML = util.alerta(error.message);
+    document.getElementById("tarjetasCierre").innerHTML = html;
+    document.getElementById("ventasDia").textContent = ventasDia;
+    document.getElementById("totalDia").textContent = formatoPesos(totalDia);
+}
+
+// ===== Observaciones del dueño =====
+async function cargarObservaciones() {
+    const respuesta = await fetch("/observaciones");
+    const lista = await respuesta.json();
+
+    let html = "";
+    let pendientes = 0;
+
+    for (let i = 0; i < lista.length; i++) {
+        let o = lista[i];
+        let tipo = tiposObservacion[o.Tipo] || ["tipo-compra", "bi-chat-left-text"];
+
+        if (!o.Atendida) {
+            pendientes++;
         }
-    }
 
-    function tarjetaObservacion(o) {
-        const [clase, icono] = TIPOS_OBSERVACION[o.Tipo] || ['tipo-compra', 'bi-chat-left-text'];
-        return `
-            <div class="observacion${o.Atendida ? ' atendida' : ''}">
+        let boton = "";
+        if (!o.Atendida) {
+            boton = `
+                <button type="button" class="boton-naranja boton-sm" onclick="marcarAtendida(${o.Id_observacion})">
+                    <span class="bi bi-check2-circle"></span>Marcar como atendida
+                </button>
+            `;
+        }
+
+        html += `
+            <div class="observacion${o.Atendida ? " atendida" : ""}">
                 <div class="cabecera-observacion">
-                    <span class="${clase}"><span class="bi ${icono} me-1"></span>${esc(o.Tipo)}</span>
-                    <small>${util.fechaCorta(o.Fecha)} · Sobre: <strong>${esc(o.Sobre)}</strong></small>
-                    <span class="${o.Atendida ? 'estado-ok' : 'estado-pendiente'} ms-auto">${o.Atendida ? 'Atendida' : 'Pendiente'}</span>
+                    <span class="${tipo[0]}"><span class="bi ${tipo[1]} me-1"></span>${o.Tipo}</span>
+                    <small>${fechaCorta(o.Fecha)} · Sobre: <strong>${o.Sobre}</strong></small>
+                    <span class="${o.Atendida ? "estado-ok" : "estado-pendiente"} ms-auto">${o.Atendida ? "Atendida" : "Pendiente"}</span>
                 </div>
-                <p class="${o.Atendida ? 'mb-0' : 'mb-2'}">${esc(o.Texto)}</p>
-                ${o.Atendida ? '' : `
-                    <button type="button" class="boton-naranja boton-sm" data-atender="${o.Id_observacion}">
-                        <span class="bi bi-check2-circle"></span>Marcar como atendida
-                    </button>`}
-            </div>`;
+                <p class="${o.Atendida ? "mb-0" : "mb-2"}">${o.Texto}</p>
+                ${boton}
+            </div>
+        `;
     }
 
-    $('listaObservaciones').addEventListener('click', async (evento) => {
-        const boton = evento.target.closest('[data-atender]');
-        if (!boton) {
-            return;
-        }
-        boton.disabled = true;
-        try {
-            await api.post(`/observaciones/${boton.dataset.atender}/atendida`, {});
-            await cargarObservaciones();
-        } catch (error) {
-            boton.disabled = false;
-            boton.insertAdjacentHTML('afterend', `<div class="mt-2">${util.alerta(error.message)}</div>`);
-        }
+    if (lista.length === 0) {
+        html = `<p class="text-muted mb-0">No hay observaciones del dueño.</p>`;
+    }
+
+    document.getElementById("listaObservaciones").innerHTML = html;
+    document.getElementById("contadorObservaciones").textContent = pendientes + (pendientes === 1 ? " pendiente" : " pendientes");
+}
+
+async function marcarAtendida(id) {
+    await fetch("/observaciones/" + id + "/atendida", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({})
     });
 
-    // ----- Empleados: GET /cajeros, GET /empleados y POST de contratar, aumento y despido -----
-    async function cargarPersonal() {
-        try {
-            const [cajeros, empleados] = await Promise.all([api.get('/cajeros'), api.get('/empleados')]);
-            personal = [
-                ...cajeros.map((c) => ({
-                    tipo: 'cajero', id: c.Id_Cajero, Nombre: c.Nombre, Cargo: 'Cajero',
-                    Etiqueta: `Cajero ${c.Id_Cajero}`, Fecha_nacimiento: c.Fecha_nacimiento, Sueldo_base: c.Sueldo_base
-                })),
-                ...empleados.map((e) => ({
-                    tipo: 'empleado', id: e.Id_Empleado, Nombre: e.Nombre, Cargo: e.Cargo,
-                    Etiqueta: e.Cargo, Fecha_nacimiento: e.Fecha_nacimiento, Sueldo_base: e.Sueldo_base
-                }))
-            ];
-            pintarCupos();
-            pintarEmpleados();
-        } catch (error) {
-            util.mensaje($('mensajeEmpleados'), error.message, 'danger');
-        }
-    }
+    await cargarObservaciones();
+}
 
-    function ocupados(cargo) {
-        return personal.filter((p) => p.Cargo === cargo).length;
-    }
+// ===== Empleados =====
+async function cargarPersonal() {
+    const respuestaCajeros = await fetch("/cajeros");
+    const cajeros = await respuestaCajeros.json();
+    const respuestaEmpleados = await fetch("/empleados");
+    const empleados = await respuestaEmpleados.json();
 
-    function pintarCupos() {
-        $('cuposCargo').innerHTML = CARGOS.map(({ cargo, plural, icono }) => {
-            const limite = CONFIG.LIMITE_CARGO[cargo];
-            const usados = ocupados(cargo);
-            const libres = limite - usados;
-            return `
-                <div class="col-6 col-lg-3">
-                    <div class="cupo${libres <= 0 ? ' completo' : ''}">
-                        <span class="bi ${icono} icono-cupo"></span>
-                        <p class="nombre-cupo">${plural}</p>
-                        <p class="numero-cupo">${usados} / ${limite}</p>
-                        <span class="etiqueta-cupo">${libres <= 0 ? 'Cupo completo' : `${libres} disponible${libres === 1 ? '' : 's'}`}</span>
-                    </div>
-                </div>`;
-        }).join('');
-    }
+    personal = [];
 
-    function pintarEmpleados() {
-        const filtro = $('filtroCargo').value;
-        const visibles = personal.filter((p) => !filtro || p.Cargo === filtro);
-
-        $('tablaEmpleados').innerHTML = visibles.length
-            ? visibles.map((p) => `
-                <tr>
-                    <td>${esc(p.Nombre)}</td>
-                    <td><span class="cargo">${esc(p.Etiqueta)}</span></td>
-                    <td>${util.fechaCorta(p.Fecha_nacimiento)}</td>
-                    <td class="text-end sueldo">${util.pesos(p.Sueldo_base)}</td>
-                    <td class="acciones">
-                        <button type="button" class="boton-naranja boton-sm" data-accion="aumento" data-tipo="${p.tipo}" data-id="${p.id}">
-                            <span class="bi bi-graph-up-arrow"></span>Aumento
-                        </button>
-                        ${p.tipo === 'empleado' ? `
-                            <button type="button" class="boton-rojo boton-sm" data-accion="despido" data-tipo="${p.tipo}" data-id="${p.id}">
-                                <span class="bi bi-person-x"></span>Despedir
-                            </button>` : ''}
-                    </td>
-                </tr>`).join('')
-            : '<tr><td colspan="5" class="text-muted">No hay empleados con ese cargo.</td></tr>';
-
-        $('etiquetaNomina').textContent = `Total nómina mensual (${visibles.length} empleado${visibles.length === 1 ? '' : 's'})`;
-        $('totalNomina').textContent = util.pesos(visibles.reduce((suma, p) => suma + p.Sueldo_base, 0));
-    }
-
-    $('filtroCargo').addEventListener('change', pintarEmpleados);
-
-    $('tablaEmpleados').addEventListener('click', (evento) => {
-        const boton = evento.target.closest('[data-accion]');
-        if (!boton) {
-            return;
-        }
-        seleccionado = personal.find((p) => p.tipo === boton.dataset.tipo && p.id === Number(boton.dataset.id));
-        if (!seleccionado) {
-            return;
-        }
-        if (boton.dataset.accion === 'aumento') {
-            abrirAumento();
-        } else {
-            abrirDespido();
-        }
-    });
-
-    // Contratar: POST /empleados
-    $('modalContratar').addEventListener('show.bs.modal', () => {
-        util.limpiarMensaje($('mensajeContratar'));
-        $('cargoNuevo').innerHTML = '<option value="">Selecciona un cargo</option>' + CARGOS.map(({ cargo }) => {
-            const limite = CONFIG.LIMITE_CARGO[cargo];
-            const usados = ocupados(cargo);
-            const bloqueado = cargo === 'Cajero' || usados >= limite;
-            const detalle = usados >= limite ? `cupo completo ${usados}/${limite}` : `${usados}/${limite}`;
-            return `<option value="${cargo}"${bloqueado ? ' disabled' : ''}>${cargo} (${detalle})</option>`;
-        }).join('');
-    });
-
-    $('btnContratar').addEventListener('click', async () => {
-        const mensaje = $('mensajeContratar');
-        const datos = {
-            Nombre: $('nombreNuevo').value.trim(),
-            Fecha_nacimiento: $('nacimientoNuevo').value,
-            Cargo: $('cargoNuevo').value,
-            Sueldo_base: util.soloDigitos($('sueldoNuevo').value),
-            Administrativo_Usuario: cuenta.usuario
-        };
-        if (!datos.Nombre || !datos.Fecha_nacimiento || !datos.Cargo || !datos.Sueldo_base) {
-            util.mensaje(mensaje, 'Llena nombre, fecha de nacimiento, cargo y sueldo.', 'warning');
-            return;
-        }
-        try {
-            const nuevo = await api.post('/empleados', datos);
-            modal('modalContratar').hide();
-            ['nombreNuevo', 'nacimientoNuevo', 'sueldoNuevo'].forEach((id) => { $(id).value = ''; });
-            util.mensaje($('mensajeEmpleados'), `${nuevo.Nombre} fue contratado como ${nuevo.Cargo}.`);
-            await cargarPersonal();
-        } catch (error) {
-            util.mensaje(mensaje, error.message, 'danger');
-        }
-    });
-
-    // Aumento: POST /empleados/{id}/aumento o /cajeros/{id}/aumento
-    function abrirAumento() {
-        $('aumentoNombre').textContent = seleccionado.Nombre;
-        $('aumentoCargo').textContent = seleccionado.Etiqueta;
-        $('aumentoSueldoActual').textContent = util.pesos(seleccionado.Sueldo_base);
-        $('porcentajeAumento').value = '';
-        $('sueldoNuevoAumento').value = '';
-        util.limpiarMensaje($('mensajeAumento'));
-        modal('modalAumento').show();
-    }
-
-    $('porcentajeAumento').addEventListener('input', () => {
-        const porcentaje = Number($('porcentajeAumento').value.replace(',', '.'));
-        if (seleccionado && porcentaje > 0) {
-            const nuevo = Math.round(seleccionado.Sueldo_base * (1 + porcentaje / 100));
-            $('sueldoNuevoAumento').value = nuevo.toLocaleString('es-CO');
-        }
-    });
-
-    $('btnAplicarAumento').addEventListener('click', async () => {
-        const mensaje = $('mensajeAumento');
-        const sueldo = util.soloDigitos($('sueldoNuevoAumento').value);
-        if (!sueldo) {
-            util.mensaje(mensaje, 'Escribe el porcentaje o el nuevo sueldo.', 'warning');
-            return;
-        }
-        const ruta = seleccionado.tipo === 'cajero'
-            ? `/cajeros/${seleccionado.id}/aumento`
-            : `/empleados/${seleccionado.id}/aumento`;
-        try {
-            await api.post(ruta, { Sueldo_base: sueldo });
-            modal('modalAumento').hide();
-            util.mensaje($('mensajeEmpleados'), `Nuevo sueldo de ${seleccionado.Nombre}: ${util.pesos(sueldo)}.`);
-            await cargarPersonal();
-        } catch (error) {
-            util.mensaje(mensaje, error.message, 'danger');
-        }
-    });
-
-    // Despido: POST /empleados/{id}/despido
-    function abrirDespido() {
-        $('despidoNombre').textContent = seleccionado.Nombre;
-        $('despidoCargo').textContent = seleccionado.Etiqueta;
-        util.limpiarMensaje($('mensajeDespido'));
-        modal('modalDespido').show();
-    }
-
-    $('btnConfirmarDespido').addEventListener('click', async () => {
-        try {
-            await api.post(`/empleados/${seleccionado.id}/despido`, {});
-            modal('modalDespido').hide();
-            util.mensaje($('mensajeEmpleados'), `${seleccionado.Nombre} fue retirado de la nómina.`);
-            await cargarPersonal();
-        } catch (error) {
-            util.mensaje($('mensajeDespido'), error.message, 'danger');
-        }
-    });
-
-    // ----- Stock: GET /productos?tipo=Insumo,Reventa -----
-    async function cargarStock() {
-        try {
-            const productos = await api.get('/productos?tipo=Insumo,Reventa');
-            $('tablaStock').innerHTML = [...util.agrupar(productos, 'Categoria')].map(([categoria, lista]) => `
-                <tr><td colspan="6" class="grupo-tabla">${esc(categoria)}</td></tr>
-                ${lista.map((p) => {
-                    const { nombre, unidad } = util.separarUnidad(p.Nombre_producto);
-                    const { minimo, bajo } = util.estadoStock(p);
-                    return `
-                        <tr>
-                            <td>${esc(nombre)}</td>
-                            <td>${esc(unidad || 'und')}</td>
-                            <td class="text-end">${p.Stock}</td>
-                            <td class="text-end">${minimo ?? '—'}</td>
-                            <td><span class="${bajo ? 'stock-bajo' : 'stock-ok'}">${bajo ? 'Stock bajo' : 'Suficiente'}</span></td>
-                            <td>${esc(p.Proveedores || '—')}</td>
-                        </tr>`;
-                }).join('')}`).join('');
-        } catch (error) {
-            $('tablaStock').innerHTML = `<tr><td colspan="6">${util.alerta(error.message)}</td></tr>`;
-        }
-    }
-
-    // ----- Pedidos a proveedores: GET /proveedores y POST /ordenes-compra -----
-    async function cargarProveedores() {
-        try {
-            proveedores = (await api.get('/proveedores')).filter((p) => p.Productos.length);
-            $('proveedor').innerHTML = proveedores
-                .map((p) => `<option value="${p.Id_proveedor}">${esc(p.Nombre_proveedor)}</option>`)
-                .join('');
-            seleccionarProveedor();
-        } catch (error) {
-            util.mensaje($('mensajeCompra'), error.message, 'danger');
-        }
-    }
-
-    function proveedorActual() {
-        return proveedores.find((p) => p.Id_proveedor === Number($('proveedor').value));
-    }
-
-    function precioCompra(idProducto) {
-        return DATOS_FUERA_DE_BD.precioCompra[idProducto] || 0;
-    }
-
-    function nuevaCompra() {
-        compraRegistrada = false;
-        $('btnRegistrarCompra').disabled = false;
-        $('numeroOrden').textContent = 'N.° OC-nueva';
-        util.limpiarMensaje($('mensajeCompra'));
-        pedido.clear();
-        document.querySelectorAll('#productosProveedor .input-cantidad').forEach((campo) => { campo.value = 0; });
-    }
-
-    function seleccionarProveedor() {
-        nuevaCompra();
-        const proveedor = proveedorActual();
-        if (!proveedor) {
-            return;
-        }
-        const contacto = util.separarContacto(proveedor.Contacto);
-        $('contactoProveedor').textContent = contacto.nombre;
-        $('telefonoProveedor').textContent = contacto.telefono;
-        $('ordenProveedor').textContent = proveedor.Nombre_proveedor;
-
-        $('productosProveedor').innerHTML = proveedor.Productos.map((p) => {
-            const { nombre, unidad } = util.separarUnidad(p.Nombre_producto);
-            const { bajo } = util.estadoStock(p);
-            const medida = unidad || 'und';
-            return `
-                <tr>
-                    <td>${esc(nombre)}</td>
-                    <td class="text-end"><span class="${bajo ? 'stock-bajo' : 'stock-ok'}">${p.Stock} ${esc(medida)}</span></td>
-                    <td class="precio-celda">${util.pesos(precioCompra(p.Id_producto))} / ${esc(medida)}</td>
-                    <td>
-                        <div class="control-cantidad">
-                            <button type="button" class="boton-cant" data-id="${p.Id_producto}" data-paso="-1" aria-label="Restar ${esc(nombre)}"><span class="bi bi-dash-lg"></span></button>
-                            <input type="text" class="input-cantidad" data-id="${p.Id_producto}" value="0" inputmode="numeric" aria-label="Cantidad de ${esc(nombre)}">
-                            <button type="button" class="boton-cant" data-id="${p.Id_producto}" data-paso="1" aria-label="Sumar ${esc(nombre)}"><span class="bi bi-plus-lg"></span></button>
-                        </div>
-                    </td>
-                </tr>`;
-        }).join('');
-        pintarCompra();
-    }
-
-    $('proveedor').addEventListener('change', seleccionarProveedor);
-
-    function cambiarCantidadCompra(id, cantidad) {
-        const valor = Math.max(0, Math.min(999, cantidad));
-        if (valor === 0) {
-            pedido.delete(id);
-        } else {
-            pedido.set(id, valor);
-        }
-        const campo = document.querySelector(`#productosProveedor .input-cantidad[data-id="${id}"]`);
-        if (campo) {
-            campo.value = valor;
-        }
-        pintarCompra();
-    }
-
-    $('productosProveedor').addEventListener('click', (evento) => {
-        const boton = evento.target.closest('.boton-cant');
-        if (!boton) {
-            return;
-        }
-        if (compraRegistrada) {
-            nuevaCompra();
-        }
-        const id = Number(boton.dataset.id);
-        cambiarCantidadCompra(id, (pedido.get(id) || 0) + Number(boton.dataset.paso));
-    });
-
-    $('productosProveedor').addEventListener('input', (evento) => {
-        if (!evento.target.classList.contains('input-cantidad')) {
-            return;
-        }
-        const cantidad = util.soloDigitos(evento.target.value);
-        if (compraRegistrada) {
-            nuevaCompra();
-        }
-        cambiarCantidadCompra(Number(evento.target.dataset.id), cantidad);
-    });
-
-    function lineasCompra() {
-        const proveedor = proveedorActual();
-        if (!proveedor) {
-            return [];
-        }
-        return [...pedido].map(([id, cantidad]) => {
-            const producto = proveedor.Productos.find((p) => p.Id_producto === id);
-            return { id, cantidad, nombre: producto.Nombre_producto, precio: precioCompra(id) };
+    for (let i = 0; i < cajeros.length; i++) {
+        let c = cajeros[i];
+        personal.push({
+            tipo: "cajero", id: c.Id_Cajero, Nombre: c.Nombre, Cargo: "Cajero",
+            Etiqueta: "Cajero " + c.Id_Cajero, Fecha_nacimiento: c.Fecha_nacimiento, Sueldo_base: Number(c.Sueldo_base)
         });
     }
 
-    function pintarCompra() {
-        const lineas = lineasCompra();
-        const subtotal = lineas.reduce((suma, l) => suma + l.cantidad * l.precio, 0);
-        const iva = subtotal * CONFIG.IVA_COMPRA;
-
-        $('lineasCompra').innerHTML = lineas.length
-            ? lineas.map((l) => `
-                <tr>
-                    <td>${esc(l.nombre)}</td>
-                    <td class="text-end">${l.cantidad}</td>
-                    <td class="text-end">${util.pesos(l.cantidad * l.precio)}</td>
-                </tr>`).join('')
-            : '<tr><td colspan="3" class="text-muted">Aún no hay productos.</td></tr>';
-
-        $('subtotalCompra').textContent = util.pesos(subtotal);
-        $('ivaCompra').textContent = util.pesos(iva);
-        $('totalCompra').textContent = util.pesos(subtotal + iva);
+    for (let i = 0; i < empleados.length; i++) {
+        let e = empleados[i];
+        personal.push({
+            tipo: "empleado", id: e.Id_Empleado, Nombre: e.Nombre, Cargo: e.Cargo,
+            Etiqueta: e.Cargo, Fecha_nacimiento: e.Fecha_nacimiento, Sueldo_base: Number(e.Sueldo_base)
+        });
     }
 
-    $('btnRegistrarCompra').addEventListener('click', async () => {
-        const mensaje = $('mensajeCompra');
-        const lineas = lineasCompra();
-        if (!lineas.length) {
-            util.mensaje(mensaje, 'Agrega al menos un producto a la compra.', 'warning');
-            return;
-        }
-        const boton = $('btnRegistrarCompra');
-        boton.disabled = true;
-        try {
-            const orden = await api.post('/ordenes-compra', {
-                Fecha_comision: util.fechaHoy(),
-                Id_proveedor: proveedorActual().Id_proveedor,
-                detalle: lineas.map((l) => ({ Id_producto: l.id, Cantidad: l.cantidad, Precio_unitario: l.precio }))
-            });
-            compraRegistrada = true;
-            $('numeroOrden').textContent = `N.° OC-${String(orden.Id_Orden_compra).padStart(4, '0')}`;
-            util.mensaje(mensaje, `Orden de compra OC-${String(orden.Id_Orden_compra).padStart(4, '0')} registrada.`);
-        } catch (error) {
-            util.mensaje(mensaje, error.message, 'danger');
-            boton.disabled = false;
-        }
-    });
+    crearCupos();
+    crearTablaEmpleados();
+}
 
-    $('btnImprimirCompra').addEventListener('click', () => window.print());
-})();
+function ocupados(cargo) {
+    let cantidad = 0;
+    for (let i = 0; i < personal.length; i++) {
+        if (personal[i].Cargo === cargo) {
+            cantidad++;
+        }
+    }
+    return cantidad;
+}
+
+function crearCupos() {
+    let html = "";
+
+    for (let i = 0; i < cargos.length; i++) {
+        let cargo = cargos[i][0];
+        let plural = cargos[i][1];
+        let icono = cargos[i][2];
+        let limite = limites[cargo];
+        let usados = ocupados(cargo);
+        let libres = limite - usados;
+
+        let etiqueta = libres <= 0 ? "Cupo completo" : libres + (libres === 1 ? " disponible" : " disponibles");
+
+        html += `
+            <div class="col-6 col-lg-3">
+                <div class="cupo${libres <= 0 ? " completo" : ""}">
+                    <span class="bi ${icono} icono-cupo"></span>
+                    <p class="nombre-cupo">${plural}</p>
+                    <p class="numero-cupo">${usados} / ${limite}</p>
+                    <span class="etiqueta-cupo">${etiqueta}</span>
+                </div>
+            </div>
+        `;
+    }
+
+    document.getElementById("cuposCargo").innerHTML = html;
+}
+
+function crearTablaEmpleados() {
+    let filtro = document.getElementById("filtroCargo").value;
+    let html = "";
+    let total = 0;
+    let cantidad = 0;
+
+    for (let i = 0; i < personal.length; i++) {
+        let p = personal[i];
+        if (filtro !== "" && p.Cargo !== filtro) {
+            continue;
+        }
+
+        cantidad++;
+        total += p.Sueldo_base;
+
+        let botonDespido = "";
+        if (p.tipo === "empleado") {
+            botonDespido = `
+                <button type="button" class="boton-rojo boton-sm" onclick="abrirDespido(${i})">
+                    <span class="bi bi-person-x"></span>Despedir
+                </button>
+            `;
+        }
+
+        html += `
+            <tr>
+                <td>${p.Nombre}</td>
+                <td><span class="cargo">${p.Etiqueta}</span></td>
+                <td>${fechaCorta(p.Fecha_nacimiento)}</td>
+                <td class="text-end sueldo">${formatoPesos(p.Sueldo_base)}</td>
+                <td class="acciones">
+                    <button type="button" class="boton-naranja boton-sm" onclick="abrirAumento(${i})">
+                        <span class="bi bi-graph-up-arrow"></span>Aumento
+                    </button>
+                    ${botonDespido}
+                </td>
+            </tr>
+        `;
+    }
+
+    if (cantidad === 0) {
+        html = `<tr><td colspan="5" class="text-muted">No hay empleados con ese cargo.</td></tr>`;
+    }
+
+    document.getElementById("tablaEmpleados").innerHTML = html;
+    document.getElementById("etiquetaNomina").textContent = `Total nómina mensual (${cantidad} ${cantidad === 1 ? "empleado" : "empleados"})`;
+    document.getElementById("totalNomina").textContent = formatoPesos(total);
+}
+
+// Contratar
+function abrirContratar() {
+    limpiarMensaje("mensajeContratar");
+
+    let html = `<option value="">Selecciona un cargo</option>`;
+    for (let i = 0; i < cargos.length; i++) {
+        let cargo = cargos[i][0];
+        let limite = limites[cargo];
+        let usados = ocupados(cargo);
+        let bloqueado = cargo === "Cajero" || usados >= limite;
+        let detalle = usados >= limite ? `cupo completo ${usados}/${limite}` : `${usados}/${limite}`;
+        html += `<option value="${cargo}" ${bloqueado ? "disabled" : ""}>${cargo} (${detalle})</option>`;
+    }
+    document.getElementById("cargoNuevo").innerHTML = html;
+
+    abrirModal("modalContratar");
+}
+
+async function contratarEmpleado() {
+    let nuevo = {
+        Nombre: document.getElementById("nombreNuevo").value.trim(),
+        Fecha_nacimiento: document.getElementById("nacimientoNuevo").value,
+        Cargo: document.getElementById("cargoNuevo").value,
+        Sueldo_base: soloNumeros(document.getElementById("sueldoNuevo").value),
+        Administrativo_Usuario: admin.usuario
+    };
+
+    if (nuevo.Nombre === "" || nuevo.Fecha_nacimiento === "" || nuevo.Cargo === "" || !nuevo.Sueldo_base) {
+        mostrarMensaje("mensajeContratar", "Llena nombre, fecha de nacimiento, cargo y sueldo.", "warning");
+        return;
+    }
+
+    const respuesta = await fetch("/empleados", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(nuevo)
+    });
+    const datos = await respuesta.json();
+
+    if (!respuesta.ok) {
+        mostrarMensaje("mensajeContratar", datos.mensaje || "No se pudo contratar al empleado.", "danger");
+        return;
+    }
+
+    cerrarModal("modalContratar");
+    document.getElementById("nombreNuevo").value = "";
+    document.getElementById("nacimientoNuevo").value = "";
+    document.getElementById("sueldoNuevo").value = "";
+    mostrarMensaje("mensajeEmpleados", `${nuevo.Nombre} fue contratado como ${nuevo.Cargo}.`);
+
+    await cargarPersonal();
+}
+
+// Aumento
+function abrirAumento(indice) {
+    seleccionado = personal[indice];
+    document.getElementById("aumentoNombre").textContent = seleccionado.Nombre;
+    document.getElementById("aumentoCargo").textContent = seleccionado.Etiqueta;
+    document.getElementById("aumentoSueldoActual").textContent = formatoPesos(seleccionado.Sueldo_base);
+    document.getElementById("porcentajeAumento").value = "";
+    document.getElementById("sueldoNuevoAumento").value = "";
+    limpiarMensaje("mensajeAumento");
+    abrirModal("modalAumento");
+}
+
+function calcularAumento() {
+    let porcentaje = Number(document.getElementById("porcentajeAumento").value.replace(",", "."));
+    if (seleccionado && porcentaje > 0) {
+        let nuevo = Math.round(seleccionado.Sueldo_base * (1 + porcentaje / 100));
+        document.getElementById("sueldoNuevoAumento").value = nuevo.toLocaleString("es-CO");
+    }
+}
+
+async function aplicarAumento() {
+    let sueldo = soloNumeros(document.getElementById("sueldoNuevoAumento").value);
+
+    if (!sueldo) {
+        mostrarMensaje("mensajeAumento", "Escribe el porcentaje o el nuevo sueldo.", "warning");
+        return;
+    }
+
+    let ruta = "/empleados/" + seleccionado.id + "/aumento";
+    if (seleccionado.tipo === "cajero") {
+        ruta = "/cajeros/" + seleccionado.id + "/aumento";
+    }
+
+    const respuesta = await fetch(ruta, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ Sueldo_base: sueldo })
+    });
+    const datos = await respuesta.json();
+
+    if (!respuesta.ok) {
+        mostrarMensaje("mensajeAumento", datos.mensaje || "No se pudo aplicar el aumento.", "danger");
+        return;
+    }
+
+    cerrarModal("modalAumento");
+    mostrarMensaje("mensajeEmpleados", `Nuevo sueldo de ${seleccionado.Nombre}: ${formatoPesos(sueldo)}.`);
+    await cargarPersonal();
+}
+
+// Despido
+function abrirDespido(indice) {
+    seleccionado = personal[indice];
+    document.getElementById("despidoNombre").textContent = seleccionado.Nombre;
+    document.getElementById("despidoCargo").textContent = seleccionado.Etiqueta;
+    limpiarMensaje("mensajeDespido");
+    abrirModal("modalDespido");
+}
+
+async function confirmarDespido() {
+    const respuesta = await fetch("/empleados/" + seleccionado.id + "/despido", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({})
+    });
+    const datos = await respuesta.json();
+
+    if (!respuesta.ok) {
+        mostrarMensaje("mensajeDespido", datos.mensaje || "No se pudo despedir al empleado.", "danger");
+        return;
+    }
+
+    cerrarModal("modalDespido");
+    mostrarMensaje("mensajeEmpleados", `${seleccionado.Nombre} fue retirado de la nómina.`);
+    await cargarPersonal();
+}
+
+// ===== Stock =====
+async function cargarStock() {
+    const respuesta = await fetch("/productos?tipo=Insumo,Reventa");
+    const productos = await respuesta.json();
+
+    let html = "";
+    let categoriaActual = "";
+
+    for (let i = 0; i < productos.length; i++) {
+        let p = productos[i];
+
+        if (p.Categoria !== categoriaActual) {
+            categoriaActual = p.Categoria;
+            html += `<tr><td colspan="6" class="grupo-tabla">${categoriaActual}</td></tr>`;
+        }
+
+        let producto = separarUnidad(p.Nombre_producto);
+        let bajo = stockBajo(p);
+        let minimo = stockMinimo[p.Id_producto];
+
+        html += `
+            <tr>
+                <td>${producto.nombre}</td>
+                <td>${producto.unidad}</td>
+                <td class="text-end">${p.Stock}</td>
+                <td class="text-end">${minimo !== undefined ? minimo : "—"}</td>
+                <td><span class="${bajo ? "stock-bajo" : "stock-ok"}">${bajo ? "Stock bajo" : "Suficiente"}</span></td>
+                <td>${p.Proveedores || "—"}</td>
+            </tr>
+        `;
+    }
+
+    document.getElementById("tablaStock").innerHTML = html;
+}
+
+// ===== Pedidos a proveedores =====
+async function cargarProveedores() {
+    const respuesta = await fetch("/proveedores");
+    const lista = await respuesta.json();
+
+    proveedores = [];
+    let html = "";
+
+    for (let i = 0; i < lista.length; i++) {
+        if (lista[i].Productos.length > 0) {
+            proveedores.push(lista[i]);
+            html += `<option value="${lista[i].Id_proveedor}">${lista[i].Nombre_proveedor}</option>`;
+        }
+    }
+
+    document.getElementById("proveedor").innerHTML = html;
+    seleccionarProveedor();
+}
+
+function proveedorActual() {
+    let id = Number(document.getElementById("proveedor").value);
+    for (let i = 0; i < proveedores.length; i++) {
+        if (proveedores[i].Id_proveedor === id) {
+            return proveedores[i];
+        }
+    }
+    return null;
+}
+
+function seleccionarProveedor() {
+    nuevaCompra();
+
+    let proveedor = proveedorActual();
+    if (!proveedor) {
+        return;
+    }
+
+    let contacto = separarContacto(proveedor.Contacto);
+    document.getElementById("contactoProveedor").textContent = contacto.nombre;
+    document.getElementById("telefonoProveedor").textContent = contacto.telefono;
+    document.getElementById("ordenProveedor").textContent = proveedor.Nombre_proveedor;
+
+    let html = "";
+    for (let i = 0; i < proveedor.Productos.length; i++) {
+        let p = proveedor.Productos[i];
+        let producto = separarUnidad(p.Nombre_producto);
+        let bajo = stockBajo(p);
+
+        html += `
+            <tr>
+                <td>${producto.nombre}</td>
+                <td class="text-end"><span class="${bajo ? "stock-bajo" : "stock-ok"}">${p.Stock} ${producto.unidad}</span></td>
+                <td class="precio-celda">${formatoPesos(precioCompra[p.Id_producto] || 0)} / ${producto.unidad}</td>
+                <td>
+                    <div class="control-cantidad">
+                        <button type="button" class="boton-cant" onclick="cambiarCantidadCompra(${p.Id_producto}, -1)" aria-label="Restar ${producto.nombre}"><span class="bi bi-dash-lg"></span></button>
+                        <input type="text" class="input-cantidad" id="compra-${p.Id_producto}" value="0" inputmode="numeric" oninput="escribirCantidadCompra(${p.Id_producto}, this.value)" aria-label="Cantidad de ${producto.nombre}">
+                        <button type="button" class="boton-cant" onclick="cambiarCantidadCompra(${p.Id_producto}, 1)" aria-label="Sumar ${producto.nombre}"><span class="bi bi-plus-lg"></span></button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }
+
+    document.getElementById("productosProveedor").innerHTML = html;
+    actualizarCompra();
+}
+
+function nuevaCompra() {
+    compraRegistrada = false;
+    pedido = {};
+    document.getElementById("btnRegistrarCompra").disabled = false;
+    document.getElementById("numeroOrden").textContent = "N.° OC-nueva";
+    limpiarMensaje("mensajeCompra");
+
+    let campos = document.querySelectorAll("#productosProveedor .input-cantidad");
+    for (let i = 0; i < campos.length; i++) {
+        campos[i].value = 0;
+    }
+}
+
+function cambiarCantidadCompra(id, paso) {
+    if (compraRegistrada) {
+        nuevaCompra();
+    }
+    ponerCantidadCompra(id, (pedido[id] || 0) + paso);
+}
+
+function escribirCantidadCompra(id, valor) {
+    let cantidad = soloNumeros(valor);
+    if (compraRegistrada) {
+        nuevaCompra();
+    }
+    ponerCantidadCompra(id, cantidad);
+}
+
+function ponerCantidadCompra(id, cantidad) {
+    if (cantidad < 0) {
+        cantidad = 0;
+    }
+    if (cantidad > 999) {
+        cantidad = 999;
+    }
+
+    if (cantidad === 0) {
+        delete pedido[id];
+    } else {
+        pedido[id] = cantidad;
+    }
+
+    document.getElementById("compra-" + id).value = cantidad;
+    actualizarCompra();
+}
+
+function lineasCompra() {
+    let proveedor = proveedorActual();
+    let lineas = [];
+    if (!proveedor) {
+        return lineas;
+    }
+
+    for (let i = 0; i < proveedor.Productos.length; i++) {
+        let p = proveedor.Productos[i];
+        if (pedido[p.Id_producto]) {
+            lineas.push({
+                id: p.Id_producto,
+                nombre: p.Nombre_producto,
+                cantidad: pedido[p.Id_producto],
+                precio: precioCompra[p.Id_producto] || 0
+            });
+        }
+    }
+    return lineas;
+}
+
+function actualizarCompra() {
+    let lineas = lineasCompra();
+    let subtotal = 0;
+    let html = "";
+
+    for (let i = 0; i < lineas.length; i++) {
+        let l = lineas[i];
+        subtotal += l.cantidad * l.precio;
+        html += `
+            <tr>
+                <td>${l.nombre}</td>
+                <td class="text-end">${l.cantidad}</td>
+                <td class="text-end">${formatoPesos(l.cantidad * l.precio)}</td>
+            </tr>
+        `;
+    }
+
+    if (lineas.length === 0) {
+        html = `<tr><td colspan="3" class="text-muted">Aún no hay productos.</td></tr>`;
+    }
+
+    let iva = subtotal * IVA_COMPRA;
+    document.getElementById("lineasCompra").innerHTML = html;
+    document.getElementById("subtotalCompra").textContent = formatoPesos(subtotal);
+    document.getElementById("ivaCompra").textContent = formatoPesos(iva);
+    document.getElementById("totalCompra").textContent = formatoPesos(subtotal + iva);
+}
+
+async function registrarCompra() {
+    let lineas = lineasCompra();
+
+    if (lineas.length === 0) {
+        mostrarMensaje("mensajeCompra", "Agrega al menos un producto a la compra.", "warning");
+        return;
+    }
+
+    let detalle = [];
+    for (let i = 0; i < lineas.length; i++) {
+        detalle.push({ Id_producto: lineas[i].id, Cantidad: lineas[i].cantidad, Precio_unitario: lineas[i].precio });
+    }
+
+    let boton = document.getElementById("btnRegistrarCompra");
+    boton.disabled = true;
+
+    const respuesta = await fetch("/ordenes-compra", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            Fecha_comision: fechaHoy(),
+            Id_proveedor: proveedorActual().Id_proveedor,
+            detalle: detalle
+        })
+    });
+    const datos = await respuesta.json();
+
+    if (!respuesta.ok) {
+        mostrarMensaje("mensajeCompra", datos.mensaje || "No se pudo registrar la compra.", "danger");
+        boton.disabled = false;
+        return;
+    }
+
+    compraRegistrada = true;
+    let numero = "OC-" + String(datos.Id_Orden_compra).padStart(4, "0");
+    document.getElementById("numeroOrden").textContent = "N.° " + numero;
+    mostrarMensaje("mensajeCompra", "Orden de compra " + numero + " registrada.");
+}
+
+function imprimirCompra() {
+    window.print();
+}
+
+function cerrarSesion() {
+    sessionStorage.removeItem("usuario");
+    window.location.href = "../Login/login.html";
+}
+
+iniciarPagina();

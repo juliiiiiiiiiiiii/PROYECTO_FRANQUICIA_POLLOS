@@ -5,9 +5,9 @@ El proyecto simula las distintas pantallas que usarían los diferentes roles del
 negocio (login, cajero, administrador y dueño) además de la carta pública.
 
 Está construido con **HTML, CSS y JavaScript**, apoyándose en **Bootstrap 5.3.3**
-y **Bootstrap Icons** cargados por CDN. El JavaScript envía y pide los datos con
-peticiones GET y POST. Mientras no exista el servidor, esas peticiones las responde
-una simulación en el navegador (ver [JavaScript y API](#javascript-y-api)).
+y **Bootstrap Icons** cargados por CDN. Cada pantalla tiene su propio archivo
+JavaScript, que envía y pide los datos al servicio (backend) con peticiones GET y
+POST (ver [JavaScript y API](#javascript-y-api)).
 
 ---
 
@@ -49,9 +49,6 @@ PROGRAMA_PROYECTO/
 │  ├─ dueno.html
 │  ├─ dueno.js
 │  └─ estilos.css
-├─ Compartido/             JavaScript común a todas las pantallas
-│  ├─ api.js               Configuración, GET/POST, sesión y utilidades
-│  └─ simulacion.js        Servidor simulado mientras no exista el backend
 ├─ BaseDeDatos_Proyecto/   Script de tablas, inserts y modelo relacional (MySQL)
 ├─ Recursos/               Imágenes del proyecto (logo y fotos del menú)
 └─ README.md
@@ -127,11 +124,10 @@ administrador.
 
 ## Cómo usarlo
 
-1. Abre la carpeta del proyecto con un servidor local, por ejemplo la extensión
-   **Live Server** (clic derecho en `Login/login.html` > *Open with Live Server*).
-   Abrir los archivos con doble clic también suele funcionar en Chrome, pero
-   algunos navegadores no comparten los datos guardados entre carpetas.
-2. Entra con una de estas cuentas (vienen de `inserts_Proyecto.sql`):
+1. Inicia el servicio de Node (por ejemplo en `http://localhost:3000`),
+   conectado a la base de datos `Franquicia_Pollos`.
+2. Abre `http://localhost:3000/Login/login.html` en el navegador.
+3. Entra con una de estas cuentas (vienen de `inserts_Proyecto.sql`):
 
 | Rol           | Usuario          | Contraseña      |
 |---------------|------------------|-----------------|
@@ -146,17 +142,22 @@ Se necesita conexión a internet para cargar Bootstrap y los iconos desde el CDN
 
 ## JavaScript y API
 
-`Compartido/api.js` tiene dos funciones que usan todas las pantallas:
-`api.get(ruta)` y `api.post(ruta, datos)`. Los datos viajan en JSON con los
-mismos nombres de columna de `SCRIPT_Proyecto.sql`.
+Cada pantalla carga solo su propio archivo: `login.js`, `cajero.js`,
+`administrador.js` y `dueno.js`. Siguen la misma estructura del proyecto de
+ejemplo (Centro Comercial):
 
-- `USAR_SIMULACION: true` (valor actual): responde `simulacion.js`, que guarda
-  los datos en el `localStorage` del navegador con los registros de los inserts.
-  Para volver a los datos iniciales, ejecuta `Simulacion.reiniciar()` en la
-  consola del navegador y recarga.
-- `USAR_SIMULACION: false`: las peticiones van con `fetch` a `API_URL`
-  (`http://localhost:3000/api`). El servidor que se construya debe responder
-  estas rutas y guardar en MySQL.
+- El HTML llama a las funciones con `onclick`, `oninput`, `onchange` u
+  `onsubmit`, por ejemplo `onclick="registrarVenta()"`.
+- Las funciones piden datos con `fetch("/ruta")` (GET) y los envían con
+  `fetch("/ruta", { method: "POST", ... })`. Los datos viajan en JSON con los
+  mismos nombres de columna de `SCRIPT_Proyecto.sql`.
+- Las rutas son relativas (`/ventas`), así que Node debe servir las carpetas de
+  las pantallas con `express.static`, igual que en el ejemplo.
+- Si la respuesta es un error, la pantalla muestra el campo `mensaje` del JSON.
+- La sesión se guarda en `sessionStorage` con la clave `usuario`. Cada pantalla
+  revisa que el rol sea el correcto y si no, vuelve al Login.
+
+El servicio debe responder estas rutas y guardar en MySQL:
 
 | Método | Ruta | Pantalla | Tabla |
 |---|---|---|---|
@@ -185,7 +186,7 @@ mismos nombres de columna de `SCRIPT_Proyecto.sql`.
 
 Datos que la interfaz usa pero que todavía no tienen columna en la base de datos:
 el precio de venta de cada producto (está en `Cajero/cajero.js`), el stock mínimo
-y el precio de compra de los insumos (están en `DATOS_FUERA_DE_BD`, en `api.js`),
+y el precio de compra de los insumos (están en `administrador.js` y `dueno.js`),
 el detalle de las órdenes de compra y las observaciones.
 
 La protección de las pantallas por rol es solo de navegación. Cuando exista el

@@ -3,10 +3,10 @@ USE Franquicia_Pollos;
 START TRANSACTION;
 
 INSERT INTO Dueno (Usuario, Contrasena, Nombre_dueno, Fecha_nacimiento) VALUES
-('carlos.ramirez', 'Dueno2026*', 'Carlos Ramírez', '1978-05-14');
+('AlbiSteed', 'Dueno2026*', 'Albi steed', '2006-02-27');
 
 INSERT INTO Administrativo (Usuario, Contrasena, Nombre_administrativo, Fecha_nacimiento) VALUES
-('laura.mendez', 'Admin2026*', 'Laura Méndez', '1988-09-02');
+('  SergioSuarez', 'Admin2026*', 'Sergio Suarez', '2007-11-25');
 
 INSERT INTO Medio_Pago (Id_medio_pago, Nombre) VALUES
 (1, 'Efectivo'),
@@ -18,8 +18,8 @@ INSERT INTO Caja (Id_Caja, Monto_inicial, Monto_actual) VALUES
 (2, 200000.00, 200000.00);
 
 INSERT INTO Cajero (Id_Cajero, Usuario, Contrasena, Nombre, Fecha_nacimiento, Credencial, Sueldo_base, Porcentaje_ganancia, Frecuencia_pago) VALUES
-(1, 'lucia.torres', 'Cajero1Dia*',   'Lucía Torres', '1996-03-21', 'CAJ-DIA-001',   1800000.00, 1.00, 'quincenal'),
-(2, 'miguel.soto',  'Cajero2Noche*', 'Miguel Soto',  '1994-11-08', 'CAJ-NOCHE-002', 1800000.00, 1.00, 'quincenal');
+(1, 'Cajero1', 'Cajero1Dia*',   'Lucía Torres', '1996-03-21', 'CAJ-DIA-001',   1800000.00, 1.00, 'quincenal'),
+(2, 'cajero2',  'Cajero2Noche*', 'Miguel Soto',  '1994-11-08', 'CAJ-NOCHE-002', 1800000.00, 1.00, 'quincenal');
 
 INSERT INTO Turno_cajero (Id_turno_cajero, Fecha, Hora_inicio, Hora_fin, Id_cajero, Id_caja) VALUES
 (1,  '2026-11-01', '08:00:00', '16:00:00', 1, 1),

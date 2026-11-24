@@ -1,0 +1,4 @@
+Login/login.js: PAGINA_POR_ROL api.post sesion.guardar sesion.obtener util.limpiarMensaje util.mensaje
+Cajero/cajero.js: CONFIG.HORARIO_CAJERO CONFIG.IVA_VENTA api.get api.post sesion.cerrar sesion.exigir util.escapar util.fechaCorta util.fechaHoy util.hora util.horaActual util.iconoMedio util.limpiarMensaje util.mensaje util.pesos util.soloDigitos
+Administrador/administrador.js: CONFIG.IVA_COMPRA CONFIG.LIMITE_CARGO DATOS_FUERA_DE_BD.precioCompra api.get api.post sesion.cerrar sesion.exigir util.agrupar util.alerta util.escapar util.estadoStock util.fechaCorta util.fechaHoy util.hora util.iconoMedio util.limpiarMensaje util.mensaje util.pesos util.separarContacto util.separarUnidad util.soloDigitos
+Dueno/dueno.js: CONFIG.HORARIO_CAJERO api.get api.post sesion.cerrar sesion.exigir util.alerta util.escapar util.estadoStock util.fechaCorta util.fechaHoy util.hora util.limpiarMensaje util.mensaje util.pesos util.separarContacto util.separarUnidad util.soloDigitos

@@ -1,34 +1,31 @@
-(() => {
-    const activa = sesion.obtener();
-    if (activa && PAGINA_POR_ROL[activa.rol]) {
-        window.location.replace(PAGINA_POR_ROL[activa.rol]);
-        return;
-    }
+// Credenciales de cada rol (las mismas de inserts_Proyecto.sql) y la vista que abre cada una
+const usuarios = [
+    { usuario: "AlbiSteed", contrasena: "Dueno2026*", rol: "dueno", nombre: "Albi Steed", vista: "../Dueno/dueno.html" },
+    { usuario: "SergioSuarez", contrasena: "Admin2026*", rol: "administrativo", nombre: "Sergio Suarez", vista: "../Administrador/administrador.html" },
+    { usuario: "Cajero1", contrasena: "Cajero1Dia*", rol: "cajero", nombre: "Lucía Torres", idCajero: 1, vista: "../Cajero/cajero.html" },
+    { usuario: "Cajero2", contrasena: "Cajero2Noche*", rol: "cajero", nombre: "Miguel Soto", idCajero: 2, vista: "../Cajero/cajero.html" }
+];
 
-    const formulario = document.getElementById('formLogin');
-    const mensaje = document.getElementById('mensajeLogin');
-    const boton = formulario.querySelector('button[type="submit"]');
+function iniciarSesion(evento) {
+    evento.preventDefault();
 
-    formulario.addEventListener('submit', async (evento) => {
-        evento.preventDefault();
-        util.limpiarMensaje(mensaje);
+    let usuario = document.getElementById("usuario").value.trim();
+    let contrasena = document.getElementById("contrasena").value;
+    let mensaje = document.getElementById("mensajeLogin");
 
-        const usuario = document.getElementById('usuario').value.trim();
-        const contrasena = document.getElementById('contrasena').value;
-
-        if (!usuario || !contrasena) {
-            util.mensaje(mensaje, 'Ingresa tu usuario y tu contraseña.', 'warning');
+    for (let i = 0; i < usuarios.length; i++) {
+        if (usuarios[i].usuario === usuario && usuarios[i].contrasena === contrasena) {
+            // Se guarda quién entró para que la vista sepa su nombre y su rol
+            sessionStorage.setItem("usuario", JSON.stringify({
+                usuario: usuarios[i].usuario,
+                nombre: usuarios[i].nombre,
+                rol: usuarios[i].rol,
+                idCajero: usuarios[i].idCajero
+            }));
+            window.location.href = usuarios[i].vista;
             return;
         }
+    }
 
-        boton.disabled = true;
-        try {
-            const cuenta = await api.post('/login', { usuario, contrasena });
-            sesion.guardar(cuenta);
-            window.location.replace(PAGINA_POR_ROL[cuenta.rol]);
-        } catch (error) {
-            util.mensaje(mensaje, error.message, 'danger');
-            boton.disabled = false;
-        }
-    });
-})();
+    mensaje.innerHTML = `<div class="alert alert-danger py-2 mb-0">Usuario o contraseña incorrectos.</div>`;
+}

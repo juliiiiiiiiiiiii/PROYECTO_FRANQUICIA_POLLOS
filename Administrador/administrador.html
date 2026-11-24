@@ -24,7 +24,7 @@
             <a href="#empleados"><span class="bi bi-people"></span>Empleados</a>
             <a href="#stock"><span class="bi bi-box-seam"></span>Stock</a>
             <a href="#pedidos"><span class="bi bi-truck"></span>Pedidos a proveedores</a>
-            <a href="#" id="cerrarSesion"><span class="bi bi-box-arrow-right"></span>Cerrar sesión</a>
+            <a href="#" id="cerrarSesion" onclick="cerrarSesion(); return false;"><span class="bi bi-box-arrow-right"></span>Cerrar sesión</a>
         </nav>
     </header>
 
@@ -41,7 +41,7 @@
                         <input type="date" class="form-control" id="fechaCierre">
                     </div>
                     <div class="col-12 col-md-8 text-md-end">
-                        <button type="button" class="boton-naranja boton-sm" id="btnConsultarCierres">
+                        <button type="button" class="boton-naranja boton-sm" id="btnConsultarCierres" onclick="cargarCierres()">
                             <span class="bi bi-search"></span>Consultar cierres
                         </button>
                     </div>
@@ -79,7 +79,7 @@
                 <div class="row g-3 align-items-end mb-3">
                     <div class="col-12 col-md-4">
                         <label for="filtroCargo" class="form-label">Filtrar por cargo</label>
-                        <select class="form-select" id="filtroCargo">
+                        <select class="form-select" id="filtroCargo" onchange="crearTablaEmpleados()">
                             <option value="">Todos</option>
                             <option>Cajero</option>
                             <option>Mesero</option>
@@ -88,7 +88,7 @@
                         </select>
                     </div>
                     <div class="col-12 col-md-8 text-md-end">
-                        <button type="button" class="boton-naranja" data-bs-toggle="modal" data-bs-target="#modalContratar">
+                        <button type="button" class="boton-naranja" onclick="abrirContratar()">
                             <span class="bi bi-person-plus"></span>Contratar empleado
                         </button>
                     </div>
@@ -154,7 +154,7 @@
                         <h2><span class="bi bi-truck"></span>Proveedor</h2>
 
                         <label for="proveedor" class="form-label">Selecciona el proveedor</label>
-                        <select class="form-select mb-3" id="proveedor"></select>
+                        <select class="form-select mb-3" id="proveedor" onchange="seleccionarProveedor()"></select>
 
                         <div class="datos-proveedor">
                             <p class="mb-1"><span class="bi bi-person me-2"></span><strong>Contacto:</strong> <span id="contactoProveedor">—</span></p>
@@ -221,10 +221,10 @@
                         </div>
 
                         <div class="d-grid gap-2 mt-3 no-imprimir">
-                            <button type="button" class="boton-naranja justify-content-center" id="btnRegistrarCompra">
+                            <button type="button" class="boton-naranja justify-content-center" id="btnRegistrarCompra" onclick="registrarCompra()">
                                 <span class="bi bi-cart-check"></span>Registrar compra
                             </button>
-                            <button type="button" class="boton-rojo justify-content-center" id="btnImprimirCompra">
+                            <button type="button" class="boton-rojo justify-content-center" id="btnImprimirCompra" onclick="imprimirCompra()">
                                 <span class="bi bi-printer"></span>Imprimir factura
                             </button>
                         </div>
@@ -274,7 +274,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="boton-gris" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="boton-naranja" id="btnContratar"><span class="bi bi-check2-circle"></span>Contratar</button>
+                    <button type="button" class="boton-naranja" id="btnContratar" onclick="contratarEmpleado()"><span class="bi bi-check2-circle"></span>Contratar</button>
                 </div>
             </div>
         </div>
@@ -305,7 +305,7 @@
                     <div class="row g-3">
                         <div class="col-12 col-md-6">
                             <label for="porcentajeAumento" class="form-label">Aumento (%)</label>
-                            <input type="text" class="form-control" id="porcentajeAumento" placeholder="Ej: 10" inputmode="numeric">
+                            <input type="text" class="form-control" id="porcentajeAumento" placeholder="Ej: 10" inputmode="numeric" oninput="calcularAumento()">
                         </div>
                         <div class="col-12 col-md-6">
                             <label for="sueldoNuevoAumento" class="form-label">Nuevo sueldo</label>
@@ -316,7 +316,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="boton-gris" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="boton-naranja" id="btnAplicarAumento"><span class="bi bi-check2-circle"></span>Aplicar aumento</button>
+                    <button type="button" class="boton-naranja" id="btnAplicarAumento" onclick="aplicarAumento()"><span class="bi bi-check2-circle"></span>Aplicar aumento</button>
                 </div>
             </div>
         </div>
@@ -347,7 +347,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="boton-gris" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="boton-rojo" id="btnConfirmarDespido"><span class="bi bi-person-x"></span>Confirmar despido</button>
+                    <button type="button" class="boton-rojo" id="btnConfirmarDespido" onclick="confirmarDespido()"><span class="bi bi-person-x"></span>Confirmar despido</button>
                 </div>
             </div>
         </div>
@@ -356,8 +356,6 @@
     <footer class="pie">&copy; 2026 El Broaster del Chef</footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../Compartido/api.js"></script>
-    <script src="../Compartido/simulacion.js"></script>
     <script src="administrador.js"></script>
 
 </body>
