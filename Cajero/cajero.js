@@ -1,4 +1,3 @@
-// Nombre que se muestra para cada categoría de la tabla Producto
 const nombresGrupo = {
     "Broaster": "Pollo broaster",
     "Brasa": "Pollos a la brasa",
@@ -10,7 +9,7 @@ const nombresGrupo = {
 const cajero = usuarioActivo("cajero");
 let IVA = 0;
 let horarios = {};
-let precios = {};      // Id_producto -> { nombre, precio }
+let precios = {};
 let cliente = null;
 let cantidades = {};
 let miTurno = false;
@@ -42,7 +41,6 @@ async function iniciar() {
     }
 }
 
-// Habilita la caja solo si es el turno de este cajero (según los cierres guardados en Turno_cajero)
 async function revisarTurno() {
     let turno = await api("/turno");
     miTurno = turno.enTurno === cajero.idCajero;
@@ -58,7 +56,6 @@ async function revisarTurno() {
     }
 }
 
-// ===== Menú =====
 function dibujarMenu(productos) {
     let html = "";
     let grupoActual = "";
@@ -102,7 +99,6 @@ function ponerCantidad(id, cantidad) {
     dibujarFactura();
 }
 
-// ===== Factura =====
 function dibujarFactura() {
     let html = "";
     let subtotal = 0;
@@ -115,7 +111,6 @@ function dibujarFactura() {
     }
     if (html === "") html = `<tr><td colspan="3" class="text-muted">Aún no hay productos.</td></tr>`;
 
-    // Si es el cumpleaños del cliente, la venta no paga IVA
     let cumpleanos = cliente && esCumpleanos(cliente.nacimiento);
     let iva = cumpleanos ? 0 : subtotal * IVA;
 
@@ -129,12 +124,10 @@ function dibujarFactura() {
     document.getElementById("facturaDocumento").textContent = cliente ? cliente.id : "—";
 }
 
-// Cumpleaños: el día y el mes del nacimiento coinciden con hoy
 function esCumpleanos(nacimiento) {
     return Boolean(nacimiento) && String(nacimiento).slice(5, 10) === fechaHoy().slice(5, 10);
 }
 
-// ===== Cliente =====
 async function buscarCliente() {
     let id = soloNumeros(document.getElementById("idCliente").value);
     if (!id) {
@@ -173,7 +166,6 @@ async function registrarCliente() {
     dibujarFactura();
 }
 
-// ===== Venta =====
 async function registrarVenta() {
     if (ventaRegistrada) {
         aviso("mensajeVenta", "Esta venta ya se registró. Presiona Nueva venta para empezar otra.", "warning");
@@ -221,7 +213,6 @@ function imprimirFactura() {
     window.print();
 }
 
-// ===== Cierre de caja =====
 function abrirCierre() {
     document.getElementById("cierreCajero").textContent = cajero.nombre;
     document.getElementById("cierreFecha").textContent = fechaHoy();
@@ -232,7 +223,6 @@ function abrirCierre() {
 }
 
 async function confirmarCierre() {
-    // Guarda el turno en Turno_cajero: la caja pasa al otro cajero y se cierra la sesión
     document.getElementById("btnConfirmarCierre").disabled = true;
     try {
         let cierre = await api("/turno/cerrar", "POST");

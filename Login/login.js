@@ -1,4 +1,3 @@
-// El servidor revisa el usuario y la contraseña en las tablas Dueno, Administrativo y Cajero
 const vistas = {
     dueno: "../Dueno/dueno.html",
     administrativo: "../Administrador/administrador.html",

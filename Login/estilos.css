@@ -1,41 +1,35 @@
-/* Colores de la franquicia */
 :root {
     --rojo: #d62828;
     --naranja: #f77f00;
     --amarillo: #fcbf49;
 }
 
-/* Fondo blanco con una franja de color arriba */
 body {
     background-color: #ffffff;
     border-top: 8px solid var(--naranja);
     border-bottom: 8px solid var(--naranja);
-    height: 100vh;           /* la página mide exactamente la pantalla */
-    box-sizing: border-box;  /* los bordes se cuentan dentro de esa altura */
+    height: 100vh;
+    box-sizing: border-box;
 }
 
-/* Tarjeta del formulario */
 .tarjeta-login {
     border-radius: 15px;
     border-top: 6px solid var(--rojo);
     border-bottom: 6px solid var(--rojo);
 }
 
-/* Logo */
 .logo {
     width: 200px;
     height: 200px;
     object-fit: contain;
 }
 
-/* Título */
 .titulo {
     font-size: 1.6rem;
     font-weight: bold;
     color: var(--rojo);
 }
 
-/* Campos de texto */
 .form-label {
     font-weight: 600;
     color: #444;
@@ -46,7 +40,6 @@ body {
     box-shadow: 0 0 0 0.2rem rgba(252, 191, 73, 0.4);
 }
 
-/* Botón */
 .btn-ingresar {
     background-color: var(--naranja);
     color: #ffffff;
@@ -60,7 +53,6 @@ body {
     color: #ffffff;
 }
 
-/* Texto del pie */
 .pie {
     color: #888;
     font-size: 0.85rem;

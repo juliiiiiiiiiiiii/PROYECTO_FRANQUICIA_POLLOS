@@ -1,5 +1,3 @@
-// Funciones que usan todas las pantallas
-
 function pesos(valor) {
     return "$ " + Math.round(valor).toLocaleString("es-CO");
 }
@@ -32,19 +30,15 @@ function limpiarAviso(id) {
     document.getElementById(id).innerHTML = "";
 }
 
-// Evita que un texto de la base de datos (nombres, observaciones) se ejecute como HTML
 function escapar(texto) {
     let reemplazos = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
     return String(texto ?? "").replace(/[&<>"']/g, c => reemplazos[c]);
 }
 
-// "16:00:00" -> "16:00"
 function horaCorta(hora) {
     return hora ? String(hora).slice(0, 5) : "";
 }
 
-// Pide datos al servidor (index.js), que es el que habla con MySQL.
-// Envía el token de la sesión y devuelve la respuesta ya convertida en objeto.
 async function api(ruta, metodo = "GET", datos) {
     let usuario = JSON.parse(sessionStorage.getItem("usuario"));
     let opciones = { method: metodo, headers: { "Content-Type": "application/json" } };
@@ -67,7 +61,6 @@ async function api(ruta, metodo = "GET", datos) {
     return cuerpo;
 }
 
-// Devuelve el usuario en sesión si tiene el rol pedido; si no, regresa al login
 function usuarioActivo(rol) {
     let usuario = JSON.parse(sessionStorage.getItem("usuario"));
     if (!usuario || usuario.rol !== rol || !usuario.token) {

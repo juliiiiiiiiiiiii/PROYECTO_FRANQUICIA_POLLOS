@@ -1,4 +1,3 @@
-// Tipo de observación -> [clase de color, ícono]
 const tiposObs = {
     "Aumento": ["tipo-aumento", "bi-graph-up-arrow"],
     "Despido": ["tipo-despido", "bi-person-x"],
@@ -9,7 +8,7 @@ const tiposObs = {
 const admin = usuarioActivo("administrativo");
 let IVA_COMPRA = 0;
 let limites = {};
-let personal = [];      // Cajeros + empleados de la base de datos
+let personal = [];
 let proveedores = [];
 let seleccionado = null;
 let pedido = {};
@@ -34,7 +33,6 @@ async function iniciar() {
     }
 }
 
-// ===== Cierres de caja =====
 async function tablaCierres() {
     let fecha = document.getElementById("fechaCierre").value || fechaHoy();
     let cierres = await api("/cierres?fecha=" + fecha);
@@ -64,9 +62,6 @@ async function tablaCierres() {
     document.getElementById("totalDia").textContent = pesos(cierres.reduce((s, c) => s + c.total, 0));
 }
 
-// ===== Observaciones del dueño =====
-// La base de datos no tiene tabla de observaciones, así que siguen en localStorage
-// (solo llegan si el dueño usa el mismo navegador).
 function leerObservaciones() {
     return JSON.parse(localStorage.getItem("observaciones") || "[]");
 }
@@ -105,7 +100,6 @@ function atender(indice) {
     listaObservaciones();
 }
 
-// ===== Empleados =====
 async function cargarEmpleados() {
     personal = await api("/empleados");
     cupos();
@@ -143,7 +137,6 @@ function tablaEmpleados() {
         if (filtro !== "" && p.Cargo !== filtro) return;
         visibles++;
         total += p.Sueldo_base;
-        // Los cajeros tienen usuario y turno propios, por eso no se despiden desde aquí
         let despido = p.Tabla === "cajero" ? "" : `<button type="button" class="boton-rojo boton-sm" onclick="abrirDespido(${i})"><span class="bi bi-person-x"></span>Despedir</button>`;
         html += `
             <tr>
@@ -262,7 +255,6 @@ async function confirmarDespido() {
     await cargarEmpleados();
 }
 
-// ===== Stock =====
 async function tablaStock() {
     let stock = await api("/inventario");
     let categoria = "";
@@ -286,7 +278,6 @@ async function tablaStock() {
     document.getElementById("tablaStock").innerHTML = html;
 }
 
-// ===== Pedidos a proveedores =====
 async function cargarProveedores() {
     let elegido = document.getElementById("proveedor").value;
     proveedores = await api("/proveedores");
@@ -379,7 +370,6 @@ async function registrarCompra() {
     try {
         let respuesta = await api("/compras", "POST", { idProveedor: p.id, items: items });
         let numero = "OC-" + String(respuesta.idOrden).padStart(4, "0");
-        // Se recarga el stock (ya incluye lo comprado) y se deja la factura a la vista para imprimirla
         await tablaStock();
         proveedores = await api("/proveedores");
         document.getElementById("numeroOrden").textContent = "N.° " + numero;
@@ -394,7 +384,7 @@ async function registrarCompra() {
 }
 
 function nuevaCompra() {
-    verProveedor();   // reinicia el pedido, los totales y el número de orden
+    verProveedor();
 }
 
 function imprimirCompra() {

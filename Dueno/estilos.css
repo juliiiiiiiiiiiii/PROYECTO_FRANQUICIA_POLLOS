@@ -1,4 +1,3 @@
-/* Colores de la franquicia */
 :root {
     --rojo: #d62828;
     --naranja: #f77f00;
@@ -10,7 +9,6 @@ body {
     border-top: 8px solid var(--naranja);
 }
 
-/* ===== Encabezado ===== */
 .encabezado {
     background-color: #fff7ec;
     border-bottom: 5px solid var(--rojo);
@@ -37,7 +35,6 @@ body {
     margin: 0;
 }
 
-/* Identificación del usuario (rol dueño) */
 .rol-usuario {
     display: inline-flex;
     align-items: center;
@@ -55,7 +52,6 @@ body {
     color: var(--rojo);
 }
 
-/* ===== Navegación por pestañas ===== */
 .nav-dueno {
     display: flex;
     flex-wrap: wrap;
@@ -88,7 +84,6 @@ body {
     color: #ffffff;
 }
 
-/* ===== Tarjetas de indicadores ===== */
 .tarjeta-indicador {
     background-color: #ffffff;
     border-radius: 12px;
@@ -132,7 +127,6 @@ body {
     margin: 0;
 }
 
-/* ===== Mi cuenta: tarjeta de saldo destacada ===== */
 .tarjeta-saldo {
     background: linear-gradient(135deg, var(--naranja), var(--rojo));
     color: #ffffff;
@@ -158,11 +152,9 @@ body {
     opacity: 0.85;
 }
 
-/* Montos de movimientos */
 .monto-ingreso { color: #2a9d8f; font-weight: 600; white-space: nowrap; }
 .monto-egreso  { color: var(--rojo); font-weight: 600; white-space: nowrap; }
 
-/* ===== Filas de dato (ventas por cajero) ===== */
 .fila-dato {
     display: flex;
     justify-content: space-between;
@@ -190,7 +182,6 @@ body {
     color: var(--rojo);
 }
 
-/* ===== Paneles ===== */
 .panel {
     background-color: #ffffff;
     border-radius: 12px;
@@ -220,7 +211,6 @@ body {
     gap: 8px;
 }
 
-/* ===== Botones ===== */
 .boton-naranja {
     background-color: var(--naranja);
     color: #ffffff;
@@ -257,7 +247,6 @@ body {
     color: #ffffff;
 }
 
-/* ===== Tablas ===== */
 .tabla {
     width: 100%;
     border-collapse: collapse;
@@ -282,7 +271,6 @@ body {
     color: #444;
 }
 
-/* Etiquetas de estado */
 .estado {
     display: inline-flex;
     align-items: center;
@@ -296,7 +284,6 @@ body {
 .estado-ok   { background-color: #e5f5f2; color: #2a9d8f; }
 .estado-bajo { background-color: #fde8e8; color: var(--rojo); }
 
-/* ===== Formularios ===== */
 .form-label {
     font-weight: 600;
     color: #444;
@@ -308,7 +295,6 @@ body {
     box-shadow: 0 0 0 0.2rem rgba(252, 191, 73, 0.4);
 }
 
-/* ===== Observaciones registradas ===== */
 .lista-observaciones {
     list-style: none;
     padding: 0;
@@ -333,7 +319,6 @@ body {
     color: var(--rojo);
 }
 
-/* ===== Modal ===== */
 .modal-dueno {
     border-radius: 12px;
     border-top: 6px solid var(--rojo);
@@ -344,7 +329,6 @@ body {
     font-weight: bold;
 }
 
-/* ===== Pie ===== */
 .pie {
     text-align: center;
     color: #999;

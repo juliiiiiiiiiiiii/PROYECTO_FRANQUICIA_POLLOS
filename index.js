@@ -3,7 +3,6 @@ const mysql = require("mysql2");
 const crypto = require("crypto");
 const app = express();
 
-// Lee la contraseña de MySQL del archivo .env (así no se sube a GitHub)
 try { process.loadEnvFile(__dirname + "/.env"); } catch { console.log("No se encontró el archivo .env"); }
 
 let conexion = mysql.createPool({
@@ -11,8 +10,8 @@ let conexion = mysql.createPool({
     database: "Franquicia_Pollos",
     user: process.env.DB_USER || "root",
     password: process.env.DB_PASSWORD,
-    dateStrings: true,     // fechas como texto "2026-11-13"
-    decimalNumbers: true   // DECIMAL como número
+    dateStrings: true,
+    decimalNumbers: true
 }).promise();
 
 conexion.query("SELECT 1")
@@ -21,14 +20,12 @@ conexion.query("SELECT 1")
 
 app.use(express.json());
 
-// Solo se publican las carpetas de las pantallas (no el .env ni la carpeta de la base de datos)
 for (let carpeta of ["Login", "Menu", "Cajero", "Dueno", "Administrador", "Recursos"]) {
     app.use("/" + carpeta, express.static(__dirname + "/" + carpeta));
 }
 app.get("/comun.js", (req, res) => res.sendFile(__dirname + "/comun.js"));
 app.get("/", (req, res) => res.redirect("/Login/login.html"));
 
-// ===== Datos que todavía no tienen columna en la base de datos (clave = Id_producto) =====
 const IVA_VENTA = 0.08;
 const IVA_COMPRA = 0.19;
 const LIMITES = { Cajero: 2, Mesero: 4, Aseo: 2, Cocinero: 5 };
@@ -37,29 +34,24 @@ const PRECIO_VENTA = { 1: 50000, 2: 28000, 3: 22000, 4: 52000, 5: 30000, 6: 1700
 const PRECIO_COMPRA = { 10: 2500, 11: 5000, 16: 14000, 17: 16000, 18: 9000, 19: 2500, 20: 4000, 21: 5000, 22: 9000, 23: 3500, 24: 20000, 25: 45000, 26: 30000, 27: 2000, 28: 90000, 29: 600 };
 const STOCK_MINIMO = { 10: 48, 11: 24, 16: 60, 17: 20, 18: 10, 19: 50, 20: 10, 21: 15, 22: 20, 23: 10, 24: 3, 25: 3, 26: 5, 27: 5, 28: 2, 29: 100 };
 
-// ===== Utilidades =====
-const hoy = () => new Date().toLocaleDateString("sv");          // "2026-11-13"
-const ahora = () => new Date().toTimeString().slice(0, 8);      // "16:05:30"
+const hoy = () => new Date().toLocaleDateString("sv");
+const ahora = () => new Date().toTimeString().slice(0, 8);
 const esFecha = texto => /^\d{4}-\d{2}-\d{2}$/.test(texto);
 const fallo = (estado, mensaje) => Object.assign(new Error(mensaje), { estado });
 
-// Cumpleaños: el día y el mes del nacimiento coinciden con la fecha de la venta (no importa el año)
 const esCumpleanos = (nacimiento, fechaVenta) =>
     Boolean(nacimiento) && String(nacimiento).slice(5, 10) === String(fechaVenta).slice(5, 10);
 
-// "Papa (kg)" -> { nombre: "Papa", unidad: "kg" }
 function separarUnidad(texto) {
     let partes = texto.match(/^(.*) \((.+)\)$/);
     return partes ? { nombre: partes[1], unidad: partes[2] } : { nombre: texto, unidad: "und" };
 }
 
-// Las tablas no tienen AUTO_INCREMENT, así que el Id nuevo es el mayor + 1
 async function nuevoId(c, tabla, columna) {
     let [filas] = await c.query(`SELECT COALESCE(MAX(${columna}), 0) + 1 AS id FROM ${tabla} FOR UPDATE`);
     return filas[0].id;
 }
 
-// Varias consultas que se guardan todas o ninguna
 async function transaccion(trabajo) {
     let c = await conexion.getConnection();
     try {
@@ -75,7 +67,6 @@ async function transaccion(trabajo) {
     }
 }
 
-// ===== Sesión: el login entrega un token y cada petición lo envía =====
 const sesiones = new Map();
 const tokenDe = req => String(req.headers.authorization).replace("Bearer ", "");
 
@@ -97,7 +88,6 @@ app.post("/api/login", async (req, res) => {
     ];
     for (let [rol, sql] of tablas) {
         let [filas] = await conexion.query(sql, [String(usuario)]);
-        // La contraseña se compara aquí porque MySQL no distingue mayúsculas en el WHERE
         let cuenta = filas.find(f => f.Contrasena === contrasena);
         if (cuenta) {
             let datos = { usuario: cuenta.Usuario, nombre: cuenta.Nombre, rol, idCajero: cuenta.Id_Cajero, token: crypto.randomUUID() };
@@ -117,7 +107,6 @@ app.get("/api/config", requiere("dueno", "administrativo", "cajero"), (req, res)
     res.json({ ivaVenta: IVA_VENTA, ivaCompra: IVA_COMPRA, limites: LIMITES, horarios: HORARIOS });
 });
 
-// ===== Cajero =====
 app.get("/api/menu", requiere("cajero"), async (req, res) => {
     let [filas] = await conexion.query("SELECT Id_producto, Nombre_producto, Categoria FROM Producto WHERE Tipo_producto <> 'Insumo' ORDER BY Id_producto");
     res.json(filas.filter(p => PRECIO_VENTA[p.Id_producto]).map(p => ({ ...p, Precio: PRECIO_VENTA[p.Id_producto] })));
@@ -145,7 +134,6 @@ app.post("/api/clientes", requiere("cajero"), async (req, res) => {
     res.json({ Id_cliente: id, Nombre: nombre });
 });
 
-// Turnos cerrados de una fecha. La caja la tiene el cajero 1 hasta que cierra; luego el cajero 2.
 async function turnos(fecha) {
     let [filas] = await conexion.query("SELECT Id_cajero, Hora_inicio, Hora_fin FROM Turno_cajero WHERE Fecha = ?", [fecha]);
     let cerrados = {};
@@ -164,13 +152,11 @@ app.post("/api/turno/cerrar", requiere("cajero"), async (req, res) => {
     let id = req.usuario.idCajero;
     if ((await turnos(hoy())).enTurno !== id) throw fallo(409, "No tienes la caja en este momento.");
 
-    // Total de las ventas de este cajero hoy (con IVA, o sin IVA si fue el cumpleaños del cliente)
     let total = (await ventasDe(hoy())).filter(v => v.Id_cajero === id).reduce((s, v) => s + v.Total, 0);
 
     await transaccion(async c => {
         await c.query("INSERT INTO Turno_cajero VALUES (?, ?, ?, ?, ?, ?)",
             [await nuevoId(c, "Turno_cajero", "Id_turno_cajero"), hoy(), HORARIOS[id].inicio, ahora(), id, id]);
-        // Al cerrar la caja, sus ventas del día se suman al estado de cuenta del dueño
         let [dueno] = await c.query("SELECT Usuario FROM Dueno LIMIT 1");
         if (total > 0 && dueno.length > 0) {
             await c.query("INSERT INTO Estado_cuenta VALUES (?, ?, ?)",
@@ -185,18 +171,15 @@ app.post("/api/ventas", requiere("cajero"), async (req, res) => {
     let { idCliente, idMedioPago, items = [] } = req.body;
     if ((await turnos(hoy())).enTurno !== idCajero) throw fallo(409, "No tienes la caja en este momento.");
     if (items.length === 0) throw fallo(400, "Agrega al menos un producto.");
-    // El precio lo pone el servidor, no el navegador
     if (items.some(i => !PRECIO_VENTA[i.idProducto] || !(i.cantidad > 0 && i.cantidad <= 99))) {
         throw fallo(400, "Hay un producto o una cantidad no válida en la factura.");
     }
 
     let idVenta = await transaccion(async c => {
         let id = await nuevoId(c, "Venta", "Id_venta");
-        // Si el cliente o el medio de pago no existen, MySQL rechaza la venta por las llaves foráneas
         await c.query("INSERT INTO Venta VALUES (?, ?, ?, ?, ?)", [id, hoy(), idCliente, idCajero, idMedioPago]);
 
         for (let i of items) {
-            // Las gaseosas (Reventa) salen del stock; lo preparado se cocina al momento
             let [p] = await c.query("SELECT Nombre_producto, Stock, Tipo_producto FROM Producto WHERE Id_producto = ? FOR UPDATE", [i.idProducto]);
             if (p[0].Tipo_producto === "Reventa") {
                 if (p[0].Stock < i.cantidad) throw fallo(409, `No hay suficiente ${p[0].Nombre_producto} (quedan ${p[0].Stock}).`);
@@ -205,13 +188,11 @@ app.post("/api/ventas", requiere("cajero"), async (req, res) => {
             await c.query("INSERT INTO Detalle_venta VALUES (?, ?, ?, ?, ?)",
                 [await nuevoId(c, "Detalle_venta", "Id_detalle_venta"), i.cantidad, PRECIO_VENTA[i.idProducto], id, i.idProducto]);
         }
-        // El dinero de la venta pasa al estado de cuenta del dueño cuando el cajero cierra la caja
         return id;
     });
     res.json({ idVenta });
 });
 
-// ===== Ventas, cierres y cuenta (dueño y administrador) =====
 async function ventasDe(fecha) {
     let [filas] = await conexion.query(`
         SELECT v.Id_venta, v.Fecha_compra, v.Id_cajero, ca.Nombre AS Cajero, cl.Nombre AS Cliente,
@@ -225,7 +206,6 @@ async function ventasDe(fecha) {
         WHERE v.Fecha_compra = ?
         GROUP BY v.Id_venta, ca.Nombre, cl.Nombre, cl.Fecha_nacimiento, m.Nombre
         ORDER BY v.Id_venta`, [fecha]);
-    // Si fue el cumpleaños del cliente, esa venta no lleva IVA
     return filas.map(v => ({
         ...v,
         Total: esCumpleanos(v.Nacimiento, v.Fecha_compra) ? v.Subtotal : Math.round(v.Subtotal * (1 + IVA_VENTA))
@@ -266,7 +246,6 @@ app.get("/api/cuenta", requiere("dueno"), async (req, res) => {
     res.json(filas[0]);
 });
 
-// ===== Empleados (los cajeros están en la tabla Cajero y el resto en Empleado) =====
 app.get("/api/empleados", requiere("dueno", "administrativo"), async (req, res) => {
     let [filas] = await conexion.query(`
         SELECT 'cajero' AS Tabla, Id_Cajero AS Id, Nombre, Fecha_nacimiento, 'Cajero' AS Cargo, Sueldo_base FROM Cajero
@@ -278,7 +257,6 @@ app.get("/api/empleados", requiere("dueno", "administrativo"), async (req, res) 
 app.post("/api/empleados", requiere("administrativo"), async (req, res) => {
     let { nombre, fechaNacimiento, cargo, sueldo } = req.body;
     if (!nombre || !esFecha(fechaNacimiento) || !(sueldo > 0)) throw fallo(400, "Llena nombre, fecha de nacimiento, cargo y sueldo.");
-    // Los cajeros necesitan usuario y contraseña, así que no se contratan desde aquí
     if (!LIMITES[cargo] || cargo === "Cajero") throw fallo(400, "Ese cargo no se puede contratar desde aquí.");
 
     await transaccion(async c => {
@@ -305,7 +283,6 @@ app.delete("/api/empleados/:id", requiere("administrativo"), async (req, res) =>
     res.json({ ok: true });
 });
 
-// ===== Inventario y proveedores =====
 app.get("/api/inventario", requiere("dueno", "administrativo"), async (req, res) => {
     let [filas] = await conexion.query(`
         SELECT p.Id_producto, p.Nombre_producto, p.Stock, p.Categoria, GROUP_CONCAT(pr.Nombre_proveedor SEPARATOR ', ') AS Proveedor
@@ -324,7 +301,7 @@ app.get("/api/proveedores", requiere("dueno", "administrativo"), async (req, res
         "SELECT pp.Id_proveedor, p.Id_producto, p.Nombre_producto, p.Stock FROM Producto_proveedor pp JOIN Producto p ON p.Id_producto = pp.Id_producto");
 
     res.json(proveedores.map(pr => {
-        let [contacto, telefono = "—"] = pr.Contacto.split(" - ");   // "Juan Medina - 987 654 321"
+        let [contacto, telefono = "—"] = pr.Contacto.split(" - ");
         return {
             id: pr.Id_proveedor, nombre: pr.Nombre_proveedor, contacto, telefono,
             productos: productos.filter(p => p.Id_proveedor === pr.Id_proveedor).map(p => ({
@@ -335,7 +312,6 @@ app.get("/api/proveedores", requiere("dueno", "administrativo"), async (req, res
     }));
 });
 
-// Compra a proveedor: crea la orden y suma lo comprado al stock
 app.post("/api/compras", requiere("administrativo"), async (req, res) => {
     let { idProveedor, items = [] } = req.body;
     if (items.length === 0) throw fallo(400, "Agrega al menos un producto a la compra.");
@@ -354,7 +330,6 @@ app.post("/api/compras", requiere("administrativo"), async (req, res) => {
     res.json({ idOrden });
 });
 
-// ===== Errores: se responden con un mensaje para mostrar en pantalla =====
 app.use((error, req, res, next) => {
     if (error.code === "ER_NO_REFERENCED_ROW_2") error = fallo(400, "El cliente, el medio de pago o el proveedor no existe.");
     if (error.code === "ER_DATA_TOO_LONG") error = fallo(400, "Uno de los textos es demasiado largo.");

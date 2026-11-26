@@ -6,7 +6,6 @@ async function iniciar() {
     document.getElementById("nombreDueno").textContent = dueno.nombre;
 
     try {
-        // Se piden todos los datos a la vez
         let [ventas, cierres, cuenta, proveedores, inventario, personal] = await Promise.all([
             api("/ventas?fecha=" + fechaHoy()),
             api("/cierres?fecha=" + fechaHoy()),
@@ -28,7 +27,6 @@ async function iniciar() {
     }
 }
 
-// ===== Resumen y Ventas =====
 function resumenYVentas(ventas, cierres) {
     let total = ventas.reduce((suma, v) => suma + v.Total, 0);
     let ticket = ventas.length ? total / ventas.length : 0;
@@ -85,7 +83,6 @@ function estadoTurno(cerrado) {
     return `<span class="estado estado-bajo"><i class="bi bi-hourglass-split"></i>Turno abierto</span>`;
 }
 
-// ===== Mi cuenta =====
 function miCuenta(ventas, saldo) {
     let efectivo = ventas.filter(v => v.Medio === "Efectivo").reduce((suma, v) => suma + v.Total, 0);
     let electronico = ventas.filter(v => v.Medio !== "Efectivo").reduce((suma, v) => suma + v.Total, 0);
@@ -105,7 +102,6 @@ function miCuenta(ventas, saldo) {
         </tr>`).join("");
 }
 
-// ===== Proveedores =====
 function tablaProveedores(proveedores) {
     let html = "";
     proveedores.forEach(p => {
@@ -121,7 +117,6 @@ function tablaProveedores(proveedores) {
     document.getElementById("tablaProveedores").innerHTML = html;
 }
 
-// ===== Inventario (solo lectura) =====
 function tablaInventario(inventario) {
     document.getElementById("tablaInventario").innerHTML = inventario.map(p => {
         let bajo = p.Minimo !== null && p.Stock < p.Minimo;
@@ -134,9 +129,6 @@ function tablaInventario(inventario) {
     }).join("");
 }
 
-// ===== Observaciones =====
-// La base de datos no tiene tabla de observaciones, así que siguen en localStorage
-// (solo las ve el administrador si usa el mismo navegador).
 function leerObservaciones() {
     return JSON.parse(localStorage.getItem("observaciones") || "[]");
 }

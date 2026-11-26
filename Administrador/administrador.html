@@ -11,13 +11,11 @@
 </head>
 <body>
 
-    <!-- Encabezado -->
     <header class="encabezado">
         <img src="../Recursos/logo.jpg" alt="Logo El Broaster del Chef">
         <h1 class="titulo">Panel del Administrador</h1>
         <p class="subtitulo">El Broaster del Chef · <span id="nombreAdmin"></span></p>
 
-        <!-- Navegación entre secciones del panel -->
         <nav class="nav-admin" aria-label="Secciones del panel">
             <a href="#cierres"><span class="bi bi-cash-stack"></span>Cierres de caja</a>
             <a href="#observaciones"><span class="bi bi-envelope-paper"></span>Observaciones</a>
@@ -30,7 +28,6 @@
 
     <main class="container py-4">
 
-        <!-- ===== Cierres de caja de los cajeros ===== -->
         <section id="cierres" class="seccion">
             <div class="panel">
                 <h2><span class="bi bi-cash-stack"></span>Cierres de caja</h2>
@@ -56,7 +53,6 @@
             </div>
         </section>
 
-        <!-- ===== Observaciones recibidas del dueño ===== -->
         <section id="observaciones" class="seccion">
             <div class="panel">
                 <h2>
@@ -68,12 +64,10 @@
             </div>
         </section>
 
-        <!-- ===== Empleados ===== -->
         <section id="empleados" class="seccion">
             <div class="panel">
                 <h2><span class="bi bi-people"></span>Empleados</h2>
 
-                <!-- Cupos por cargo: no se puede contratar más allá del límite -->
                 <div class="row g-3 mb-4" id="cuposCargo"></div>
 
                 <div class="row g-3 align-items-end mb-3">
@@ -120,7 +114,6 @@
             </div>
         </section>
 
-        <!-- ===== Stock de productos en crudo ===== -->
         <section id="stock" class="seccion">
             <div class="panel">
                 <h2><span class="bi bi-box-seam"></span>Stock de productos en crudo</h2>
@@ -143,11 +136,9 @@
             </div>
         </section>
 
-        <!-- ===== Pedidos a proveedores ===== -->
         <section id="pedidos" class="seccion">
             <div class="row g-4">
 
-                <!-- Columna izquierda: proveedor + productos -->
                 <div class="col-12 col-lg-7">
 
                     <div class="panel mb-4">
@@ -183,7 +174,6 @@
 
                 </div>
 
-                <!-- Columna derecha: factura de compra -->
                 <div class="col-12 col-lg-5">
                     <div class="factura">
                         <div class="factura-cabecera">
@@ -241,7 +231,6 @@
 
     </main>
 
-    <!-- ===== Modal: Contratar empleado ===== -->
     <div class="modal fade" id="modalContratar" tabindex="-1" aria-labelledby="tituloContratar" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content modal-admin">
@@ -261,7 +250,6 @@
                         </div>
                         <div class="col-12 col-md-6">
                             <label for="cargoNuevo" class="form-label">Cargo</label>
-                            <!-- Los cargos con cupo completo aparecen deshabilitados -->
                             <select class="form-select" id="cargoNuevo"></select>
                         </div>
                         <div class="col-12">
@@ -283,7 +271,6 @@
         </div>
     </div>
 
-    <!-- ===== Modal: Aumento de sueldo ===== -->
     <div class="modal fade" id="modalAumento" tabindex="-1" aria-labelledby="tituloAumento" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content modal-admin">
@@ -325,7 +312,6 @@
         </div>
     </div>
 
-    <!-- ===== Modal: Despedir empleado ===== -->
     <div class="modal fade" id="modalDespido" tabindex="-1" aria-labelledby="tituloDespido" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content modal-admin">

@@ -1,11 +1,9 @@
-/* Colores de la franquicia */
 :root {
     --rojo: #d62828;
     --naranja: #f77f00;
     --amarillo: #fcbf49;
 }
 
-/* Fondo general */
 body {
     background-color: #ffffff;
     border-top: 8px solid var(--naranja);
@@ -13,20 +11,17 @@ body {
     min-height: 100vh;
 }
 
-/* Encabezado */
 .encabezado {
     background-color: #fff7ec;
     border-bottom: 6px solid var(--rojo);
 }
 
-/* Logo */
 .logo {
     width: 140px;
     height: 140px;
     object-fit: contain;
 }
 
-/* Título */
 .titulo {
     font-size: 2rem;
     font-weight: bold;
@@ -39,7 +34,6 @@ body {
     font-size: 20px;
 }
 
-/* Menú de navegación */
 .enlace-nav {
     color: #444;
     font-weight: 600;
@@ -54,7 +48,6 @@ body {
     border-bottom-color: var(--amarillo);
 }
 
-/* Títulos de sección */
 .titulo-seccion {
     color: var(--rojo);
     font-weight: bold;
@@ -64,7 +57,6 @@ body {
     border-bottom: 3px solid var(--amarillo);
 }
 
-/* Tarjetas de producto */
 .tarjeta-producto {
     position: relative;
     border: none;
@@ -79,28 +71,24 @@ body {
     border-top-color: var(--rojo);
 }
 
-/* Imagen de producto */
 .imagen-producto {
     width: 100%;
     height: 200px;
     object-fit: cover;
 }
 
-/* Nombre del producto */
 .nombre-producto {
     color: var(--rojo);
     font-weight: bold;
     font-size: 1.15rem;
 }
 
-/* Descripción */
 .descripcion {
     color: #555;
     font-size: 0.95rem;
     min-height: 48px;
 }
 
-/* Precio */
 .precio {
     display: inline-block;
     background-color: var(--amarillo);
@@ -110,7 +98,6 @@ body {
     border-radius: 20px;
 }
 
-/* Tarjetas de combo */
 .tarjeta-combo {
     border-top-color: var(--rojo);
 }
@@ -129,7 +116,6 @@ body {
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
 }
 
-/* Pie de página */
 .pie-pagina {
     background-color: #2b2b2b;
     border-top: 6px solid var(--rojo);
@@ -164,7 +150,6 @@ body {
     color: var(--naranja);
 }
 
-/* Redes sociales */
 .redes-footer a {
     display: inline-flex;
     align-items: center;
