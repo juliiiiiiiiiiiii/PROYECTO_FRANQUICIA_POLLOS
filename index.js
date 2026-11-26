@@ -43,6 +43,10 @@ const ahora = () => new Date().toTimeString().slice(0, 8);      // "16:05:30"
 const esFecha = texto => /^\d{4}-\d{2}-\d{2}$/.test(texto);
 const fallo = (estado, mensaje) => Object.assign(new Error(mensaje), { estado });
 
+// Cumpleaños: el día y el mes del nacimiento coinciden con la fecha de la venta (no importa el año)
+const esCumpleanos = (nacimiento, fechaVenta) =>
+    Boolean(nacimiento) && String(nacimiento).slice(5, 10) === String(fechaVenta).slice(5, 10);
+
 // "Papa (kg)" -> { nombre: "Papa", unidad: "kg" }
 function separarUnidad(texto) {
     let partes = texto.match(/^(.*) \((.+)\)$/);
@@ -194,8 +198,12 @@ app.post("/api/ventas", requiere("cajero"), async (req, res) => {
                 [await nuevoId(c, "Detalle_venta", "Id_detalle_venta"), i.cantidad, PRECIO_VENTA[i.idProducto], id, i.idProducto]);
         }
 
-        // El total de la venta (con IVA) se suma al estado de cuenta del dueño
-        let total = Math.round(subtotal * (1 + IVA_VENTA));
+        // Si hoy es el cumpleaños del cliente, la venta no paga IVA
+        let [clienteVenta] = await c.query("SELECT Fecha_nacimiento FROM Cliente WHERE Id_cliente = ?", [idCliente]);
+        let cumpleanos = clienteVenta.length > 0 && esCumpleanos(clienteVenta[0].Fecha_nacimiento, hoy());
+
+        // El total de la venta se suma al estado de cuenta del dueño (sin IVA si es cumpleaños)
+        let total = cumpleanos ? subtotal : Math.round(subtotal * (1 + IVA_VENTA));
         let [dueno] = await c.query("SELECT Usuario FROM Dueno LIMIT 1");
         if (dueno.length > 0) {
             await c.query("INSERT INTO Estado_cuenta VALUES (?, ?, ?)",
@@ -209,7 +217,8 @@ app.post("/api/ventas", requiere("cajero"), async (req, res) => {
 // ===== Ventas, cierres y cuenta (dueño y administrador) =====
 async function ventasDe(fecha) {
     let [filas] = await conexion.query(`
-        SELECT v.Id_venta, v.Fecha_compra, v.Id_cajero, ca.Nombre AS Cajero, cl.Nombre AS Cliente, m.Nombre AS Medio,
+        SELECT v.Id_venta, v.Fecha_compra, v.Id_cajero, ca.Nombre AS Cajero, cl.Nombre AS Cliente,
+               cl.Fecha_nacimiento AS Nacimiento, m.Nombre AS Medio,
                SUM(d.Cantidad * d.Precio_unitario) AS Subtotal
         FROM Venta v
         JOIN Cajero ca ON ca.Id_Cajero = v.Id_cajero
@@ -217,9 +226,13 @@ async function ventasDe(fecha) {
         JOIN Medio_Pago m ON m.Id_medio_pago = v.Id_medio_pago
         JOIN Detalle_venta d ON d.Id_venta = v.Id_venta
         WHERE v.Fecha_compra = ?
-        GROUP BY v.Id_venta, ca.Nombre, cl.Nombre, m.Nombre
+        GROUP BY v.Id_venta, ca.Nombre, cl.Nombre, cl.Fecha_nacimiento, m.Nombre
         ORDER BY v.Id_venta`, [fecha]);
-    return filas.map(v => ({ ...v, Total: Math.round(v.Subtotal * (1 + IVA_VENTA)) }));
+    // Si fue el cumpleaños del cliente, esa venta no lleva IVA
+    return filas.map(v => ({
+        ...v,
+        Total: esCumpleanos(v.Nacimiento, v.Fecha_compra) ? v.Subtotal : Math.round(v.Subtotal * (1 + IVA_VENTA))
+    }));
 }
 
 const fechaPedida = req => esFecha(req.query.fecha) ? req.query.fecha : hoy();

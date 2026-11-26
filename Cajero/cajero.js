@@ -115,13 +115,23 @@ function dibujarFactura() {
     }
     if (html === "") html = `<tr><td colspan="3" class="text-muted">Aún no hay productos.</td></tr>`;
 
+    // Si es el cumpleaños del cliente, la venta no paga IVA
+    let cumpleanos = cliente && esCumpleanos(cliente.nacimiento);
+    let iva = cumpleanos ? 0 : subtotal * IVA;
+
     document.getElementById("lineasFactura").innerHTML = html;
     document.getElementById("subtotalFactura").textContent = pesos(subtotal);
-    document.getElementById("ivaFactura").textContent = pesos(subtotal * IVA);
-    document.getElementById("totalFactura").textContent = pesos(subtotal + subtotal * IVA);
+    document.getElementById("etiquetaIva").textContent = cumpleanos ? "IVA (exonerado por cumpleaños)" : `IVA (${IVA * 100}%)`;
+    document.getElementById("ivaFactura").textContent = pesos(iva);
+    document.getElementById("totalFactura").textContent = pesos(subtotal + iva);
 
     document.getElementById("facturaCliente").textContent = cliente ? cliente.nombre : "(sin seleccionar)";
     document.getElementById("facturaDocumento").textContent = cliente ? cliente.id : "—";
+}
+
+// Cumpleaños: el día y el mes del nacimiento coinciden con hoy
+function esCumpleanos(nacimiento) {
+    return Boolean(nacimiento) && String(nacimiento).slice(5, 10) === fechaHoy().slice(5, 10);
 }
 
 // ===== Cliente =====
@@ -133,7 +143,7 @@ async function buscarCliente() {
     }
     try {
         let encontrado = await api("/clientes/" + id);
-        cliente = { id: encontrado.Id_cliente, nombre: encontrado.Nombre };
+        cliente = { id: encontrado.Id_cliente, nombre: encontrado.Nombre, nacimiento: encontrado.Fecha_nacimiento };
         document.getElementById("nombreCliente").value = encontrado.Nombre;
         document.getElementById("cumpleCliente").value = encontrado.Fecha_nacimiento;
         aviso("mensajeCliente", "Cliente seleccionado: " + encontrado.Nombre + ".");
@@ -155,7 +165,7 @@ async function registrarCliente() {
     }
     try {
         let nuevo = await api("/clientes", "POST", { id: id, nombre: nombre, fechaNacimiento: cumple });
-        cliente = { id: nuevo.Id_cliente, nombre: nuevo.Nombre };
+        cliente = { id: nuevo.Id_cliente, nombre: nuevo.Nombre, nacimiento: cumple };
         aviso("mensajeCliente", "Cliente " + nuevo.Nombre + " registrado.");
     } catch (error) {
         aviso("mensajeCliente", error.message, "warning");
