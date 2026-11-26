@@ -126,6 +126,6 @@ INSERT INTO Producto_proveedor (Id_producto, Id_proveedor) VALUES
 (11, 15);
 
 INSERT INTO Estado_cuenta (Id_estado_cuenta, Monto, Usuario_dueno) VALUES
-(1, 14320000.00, 'carlos.ramirez');
+(1, 14320000.00, 'AlbiSteed');
 
 COMMIT;
