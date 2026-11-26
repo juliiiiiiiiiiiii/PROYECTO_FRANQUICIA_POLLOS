@@ -163,9 +163,19 @@ app.get("/api/turno", requiere("cajero"), async (req, res) => {
 app.post("/api/turno/cerrar", requiere("cajero"), async (req, res) => {
     let id = req.usuario.idCajero;
     if ((await turnos(hoy())).enTurno !== id) throw fallo(409, "No tienes la caja en este momento.");
+
+    // Total de las ventas de este cajero hoy (con IVA, o sin IVA si fue el cumpleaños del cliente)
+    let total = (await ventasDe(hoy())).filter(v => v.Id_cajero === id).reduce((s, v) => s + v.Total, 0);
+
     await transaccion(async c => {
         await c.query("INSERT INTO Turno_cajero VALUES (?, ?, ?, ?, ?, ?)",
             [await nuevoId(c, "Turno_cajero", "Id_turno_cajero"), hoy(), HORARIOS[id].inicio, ahora(), id, id]);
+        // Al cerrar la caja, sus ventas del día se suman al estado de cuenta del dueño
+        let [dueno] = await c.query("SELECT Usuario FROM Dueno LIMIT 1");
+        if (total > 0 && dueno.length > 0) {
+            await c.query("INSERT INTO Estado_cuenta VALUES (?, ?, ?)",
+                [await nuevoId(c, "Estado_cuenta", "Id_estado_cuenta"), total, dueno[0].Usuario]);
+        }
     });
     res.json({ siguiente: id === 1 ? 2 : null });
 });
@@ -185,7 +195,6 @@ app.post("/api/ventas", requiere("cajero"), async (req, res) => {
         // Si el cliente o el medio de pago no existen, MySQL rechaza la venta por las llaves foráneas
         await c.query("INSERT INTO Venta VALUES (?, ?, ?, ?, ?)", [id, hoy(), idCliente, idCajero, idMedioPago]);
 
-        let subtotal = 0;
         for (let i of items) {
             // Las gaseosas (Reventa) salen del stock; lo preparado se cocina al momento
             let [p] = await c.query("SELECT Nombre_producto, Stock, Tipo_producto FROM Producto WHERE Id_producto = ? FOR UPDATE", [i.idProducto]);
@@ -193,22 +202,10 @@ app.post("/api/ventas", requiere("cajero"), async (req, res) => {
                 if (p[0].Stock < i.cantidad) throw fallo(409, `No hay suficiente ${p[0].Nombre_producto} (quedan ${p[0].Stock}).`);
                 await c.query("UPDATE Producto SET Stock = Stock - ? WHERE Id_producto = ?", [i.cantidad, i.idProducto]);
             }
-            subtotal += PRECIO_VENTA[i.idProducto] * i.cantidad;
             await c.query("INSERT INTO Detalle_venta VALUES (?, ?, ?, ?, ?)",
                 [await nuevoId(c, "Detalle_venta", "Id_detalle_venta"), i.cantidad, PRECIO_VENTA[i.idProducto], id, i.idProducto]);
         }
-
-        // Si hoy es el cumpleaños del cliente, la venta no paga IVA
-        let [clienteVenta] = await c.query("SELECT Fecha_nacimiento FROM Cliente WHERE Id_cliente = ?", [idCliente]);
-        let cumpleanos = clienteVenta.length > 0 && esCumpleanos(clienteVenta[0].Fecha_nacimiento, hoy());
-
-        // El total de la venta se suma al estado de cuenta del dueño (sin IVA si es cumpleaños)
-        let total = cumpleanos ? subtotal : Math.round(subtotal * (1 + IVA_VENTA));
-        let [dueno] = await c.query("SELECT Usuario FROM Dueno LIMIT 1");
-        if (dueno.length > 0) {
-            await c.query("INSERT INTO Estado_cuenta VALUES (?, ?, ?)",
-                [await nuevoId(c, "Estado_cuenta", "Id_estado_cuenta"), total, dueno[0].Usuario]);
-        }
+        // El dinero de la venta pasa al estado de cuenta del dueño cuando el cajero cierra la caja
         return id;
     });
     res.json({ idVenta });
