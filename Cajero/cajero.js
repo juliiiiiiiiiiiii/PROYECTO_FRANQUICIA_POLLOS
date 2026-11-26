@@ -6,6 +6,16 @@ const horarios = {
     2: { inicio: "16:00:00", caja: 2, turno: "Noche" }
 };
 
+// Nombre de cada cajero para los avisos del turno
+const nombresCajero = { 1: "Lucía Torres (Día)", 2: "Miguel Soto (Noche)" };
+
+// Medios de pago (tabla Medio_Pago)
+const mediosPago = [
+    { Id_medio_pago: 1, Nombre: "Efectivo" },
+    { Id_medio_pago: 2, Nombre: "Tarjeta" },
+    { Id_medio_pago: 3, Nombre: "Transferencia / Nequi" }
+];
+
 // Productos y precios del menú (Menu/menu.html). El primer número es el Id_producto.
 const menu = [
     { grupo: "Pollo broaster", productos: [[1, "Broaster 8 presas", 50000], [2, "Broaster 4 presas", 28000], [3, "Alitas broaster", 22000]] },
@@ -19,6 +29,23 @@ let cajero = JSON.parse(sessionStorage.getItem("usuario"));
 let cliente = null;
 let cantidades = {};
 let ventaRegistrada = false;
+let turnoHabilitado = false;
+
+// ===== Caja compartida entre los dos cajeros (localStorage) =====
+// Guarda de quién es el turno activo. El turno empieza en el Cajero 1 (día).
+function cajeroEnTurno() {
+    let valor = localStorage.getItem("cajeroEnTurno");
+    if (valor === null) {
+        localStorage.setItem("cajeroEnTurno", "1");
+        return 1;
+    }
+    return Number(valor);
+}
+
+function pasarCajaAlOtro() {
+    let siguiente = cajero.idCajero === 1 ? 2 : 1;
+    localStorage.setItem("cajeroEnTurno", String(siguiente));
+}
 
 // ===== Funciones de apoyo =====
 function formatoPesos(valor) {
@@ -107,8 +134,35 @@ function iniciarPagina() {
     document.getElementById("etiquetaIva").textContent = `IVA (${IVA_VENTA * 100}%)`;
 
     crearMenu();
-    actualizarFactura();
     cargarMediosPago();
+    actualizarFactura();
+    revisarTurno();
+}
+
+// Habilita o bloquea la caja según de quién sea el turno
+function revisarTurno() {
+    turnoHabilitado = cajeroEnTurno() === cajero.idCajero;
+
+    let botones = ["btnBuscarCliente", "btnRegistrarCliente", "btnRegistrarVenta", "btnImprimir"];
+    for (let i = 0; i < botones.length; i++) {
+        document.getElementById(botones[i]).disabled = !turnoHabilitado;
+    }
+
+    let camposCantidad = document.getElementsByClassName("boton-cant");
+    for (let i = 0; i < camposCantidad.length; i++) {
+        camposCantidad[i].disabled = !turnoHabilitado;
+    }
+    let inputsCantidad = document.getElementsByClassName("input-cantidad");
+    for (let i = 0; i < inputsCantidad.length; i++) {
+        inputsCantidad[i].disabled = !turnoHabilitado;
+    }
+
+    if (turnoHabilitado) {
+        limpiarMensaje("mensajeTurno");
+    } else {
+        let otro = nombresCajero[cajeroEnTurno()];
+        mostrarMensaje("mensajeTurno", "La caja la tiene " + otro + ". No puedes registrar ventas hasta que cierre su turno y te entregue la caja.", "warning");
+    }
 }
 
 // ===== Menú y cantidades =====
@@ -144,6 +198,9 @@ function crearMenu() {
 }
 
 function cambiarCantidad(id, paso) {
+    if (!turnoHabilitado) {
+        return;
+    }
     if (ventaRegistrada) {
         nuevaVenta(true);
     }
@@ -152,6 +209,9 @@ function cambiarCantidad(id, paso) {
 }
 
 function escribirCantidad(id, valor) {
+    if (!turnoHabilitado) {
+        return;
+    }
     let cantidad = soloNumeros(valor);
     if (ventaRegistrada) {
         nuevaVenta(true);
@@ -221,19 +281,16 @@ function mostrarClienteEnFactura() {
     document.getElementById("facturaDocumento").textContent = cliente ? cliente.Id_cliente : "—";
 }
 
-async function cargarMediosPago() {
-    const respuesta = await fetch("/medios-pago");
-    const medios = await respuesta.json();
-
+function cargarMediosPago() {
     let html = "";
-    for (let i = 0; i < medios.length; i++) {
-        html += `<option value="${medios[i].Id_medio_pago}">${medios[i].Nombre}</option>`;
+    for (let i = 0; i < mediosPago.length; i++) {
+        html += `<option value="${mediosPago[i].Id_medio_pago}">${mediosPago[i].Nombre}</option>`;
     }
     document.getElementById("metodoPago").innerHTML = html;
 }
 
 // ===== Cliente =====
-async function buscarCliente() {
+function buscarCliente() {
     if (ventaRegistrada) {
         nuevaVenta(false);
     }
@@ -244,24 +301,20 @@ async function buscarCliente() {
         return;
     }
 
-    const respuesta = await fetch("/clientes/" + documento);
+    // Sin base de datos todavía: se toma el nombre que esté escrito, o uno genérico
+    let nombre = document.getElementById("nombreCliente").value.trim() || "Cliente " + documento;
+    cliente = {
+        Id_cliente: documento,
+        Nombre: nombre,
+        Fecha_nacimiento: document.getElementById("cumpleCliente").value
+    };
 
-    if (respuesta.ok) {
-        cliente = await respuesta.json();
-        document.getElementById("nombreCliente").value = cliente.Nombre;
-        document.getElementById("cumpleCliente").value = cliente.Fecha_nacimiento;
-        mostrarMensaje("mensajeCliente", "Cliente encontrado: " + cliente.Nombre + ".");
-    } else {
-        cliente = null;
-        document.getElementById("nombreCliente").value = "";
-        document.getElementById("cumpleCliente").value = "";
-        mostrarMensaje("mensajeCliente", "El cliente no está registrado. Llena sus datos y regístralo.", "warning");
-    }
-
+    document.getElementById("nombreCliente").value = nombre;
+    mostrarMensaje("mensajeCliente", "Cliente seleccionado: " + nombre + ".");
     mostrarClienteEnFactura();
 }
 
-async function registrarCliente() {
+function registrarCliente() {
     if (ventaRegistrada) {
         nuevaVenta(false);
     }
@@ -277,25 +330,18 @@ async function registrarCliente() {
         return;
     }
 
-    const respuesta = await fetch("/clientes", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(nuevo)
-    });
-    const datos = await respuesta.json();
-
-    if (!respuesta.ok) {
-        mostrarMensaje("mensajeCliente", datos.mensaje || "No se pudo registrar el cliente.", "danger");
-        return;
-    }
-
-    cliente = datos;
+    cliente = nuevo;
     mostrarMensaje("mensajeCliente", "Cliente " + cliente.Nombre + " registrado.");
     mostrarClienteEnFactura();
 }
 
 // ===== Venta =====
-async function registrarVenta() {
+function registrarVenta() {
+    if (!turnoHabilitado) {
+        mostrarMensaje("mensajeVenta", "No tienes la caja en este momento.", "warning");
+        return;
+    }
+
     let lineas = lineasFactura();
 
     if (!cliente) {
@@ -307,38 +353,13 @@ async function registrarVenta() {
         return;
     }
 
-    let detalle = [];
-    for (let i = 0; i < lineas.length; i++) {
-        detalle.push({ Id_producto: lineas[i].id, Cantidad: lineas[i].cantidad, Precio_unitario: lineas[i].precio });
-    }
-
-    let venta = {
-        Fecha_compra: fechaHoy(),
-        Id_cliente: cliente.Id_cliente,
-        Id_cajero: cajero.idCajero,
-        Id_medio_pago: Number(document.getElementById("metodoPago").value),
-        detalle: detalle
-    };
-
-    let boton = document.getElementById("btnRegistrarVenta");
-    boton.disabled = true;
-
-    const respuesta = await fetch("/ventas", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(venta)
-    });
-    const datos = await respuesta.json();
-
-    if (!respuesta.ok) {
-        mostrarMensaje("mensajeVenta", datos.mensaje || "No se pudo registrar la venta.", "danger");
-        boton.disabled = false;
-        return;
-    }
+    // Número de factura consecutivo guardado en el navegador
+    let numero = Number(localStorage.getItem("ultimaFactura") || "0") + 1;
+    localStorage.setItem("ultimaFactura", String(numero));
 
     ventaRegistrada = true;
-    document.getElementById("numeroFactura").textContent = "N.° " + String(datos.Id_venta).padStart(4, "0");
-    mostrarMensaje("mensajeVenta", `Venta N.° ${datos.Id_venta} registrada. Puedes imprimirla; al cambiar un producto o un cliente empieza una venta nueva.`);
+    document.getElementById("numeroFactura").textContent = "N.° " + String(numero).padStart(4, "0");
+    mostrarMensaje("mensajeVenta", `Venta N.° ${numero} registrada. Puedes imprimirla; al cambiar un producto o un cliente empieza una venta nueva.`);
 }
 
 // limpiarCliente = false conserva lo que el cajero acaba de escribir en los datos del cliente
@@ -347,7 +368,7 @@ function nuevaVenta(limpiarCliente) {
     cantidades = {};
     cliente = null;
 
-    document.getElementById("btnRegistrarVenta").disabled = false;
+    document.getElementById("btnRegistrarVenta").disabled = !turnoHabilitado;
     document.getElementById("numeroFactura").textContent = "N.° nueva";
     limpiarMensaje("mensajeVenta");
 
@@ -372,79 +393,39 @@ function imprimirFactura() {
 }
 
 // ===== Cierre de caja =====
-async function abrirCierre() {
-    let boton = document.getElementById("btnConfirmarCierre");
-    boton.disabled = true;
-    limpiarMensaje("mensajeCierre");
+function abrirCierre() {
     bootstrap.Modal.getOrCreateInstance(document.getElementById("modalCierre")).show();
+    limpiarMensaje("mensajeCierre");
 
-    const respuesta = await fetch("/cierres?fecha=" + fechaHoy());
-    const cierres = await respuesta.json();
-
-    let cierre = null;
-    for (let i = 0; i < cierres.length; i++) {
-        if (cierres[i].Id_cajero === cajero.idCajero) {
-            cierre = cierres[i];
-        }
-    }
-
-    if (!cierre) {
-        mostrarMensaje("mensajeCierre", "No se encontró la información del turno.", "danger");
-        return;
-    }
-
+    let horario = horarios[cajero.idCajero];
     document.getElementById("cierreCajero").textContent = cajero.nombre;
     document.getElementById("cierreFecha").textContent = fechaCorta(fechaHoy());
-    document.getElementById("cierreApertura").textContent = hora12(cierre.Hora_inicio);
-    document.getElementById("cierreHora").textContent = cierre.Cerrado ? hora12(cierre.Hora_fin) : hora12(horaActual()) + " (ahora)";
-    document.getElementById("cierreVentas").textContent = cierre.Num_ventas;
-    document.getElementById("cierreTotal").textContent = formatoPesos(cierre.Total);
+    document.getElementById("cierreApertura").textContent = hora12(horario.inicio);
+    document.getElementById("cierreHora").textContent = hora12(horaActual()) + " (ahora)";
 
-    let html = "";
-    for (let i = 0; i < cierre.Por_medio.length; i++) {
-        let medio = cierre.Por_medio[i];
-        html += `
-            <div class="fila-cierre">
-                <span><span class="bi ${iconoMedio(medio.Medio_pago)} me-2"></span>${medio.Medio_pago}</span>
-                <strong>${formatoPesos(medio.Total)}</strong>
-            </div>
-        `;
-    }
-    document.getElementById("cierrePorMedio").innerHTML = html;
-
-    if (cierre.Cerrado) {
-        mostrarMensaje("mensajeCierre", "El turno de hoy ya está cerrado.", "info");
+    let boton = document.getElementById("btnConfirmarCierre");
+    if (!turnoHabilitado) {
+        mostrarMensaje("mensajeCierre", "No tienes la caja: no hay turno que cerrar.", "warning");
+        boton.disabled = true;
     } else {
         boton.disabled = false;
     }
 }
 
-async function confirmarCierre() {
-    let horario = horarios[cajero.idCajero];
-    let boton = document.getElementById("btnConfirmarCierre");
-    boton.disabled = true;
-
-    const respuesta = await fetch("/turnos", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            Fecha: fechaHoy(),
-            Hora_inicio: horario.inicio,
-            Hora_fin: horaActual(),
-            Id_cajero: cajero.idCajero,
-            Id_caja: horario.caja
-        })
-    });
-    const datos = await respuesta.json();
-
-    if (!respuesta.ok) {
-        mostrarMensaje("mensajeCierre", datos.mensaje || "No se pudo cerrar la caja.", "danger");
-        boton.disabled = false;
+function confirmarCierre() {
+    if (!turnoHabilitado) {
         return;
     }
 
-    mostrarMensaje("mensajeCierre", "Caja cerrada. Se cerrará la sesión para el cambio de turno.");
-    setTimeout(cerrarSesion, 2000);
+    // Se entrega la caja al otro cajero y se cierra la sesión
+    pasarCajaAlOtro();
+
+    let otro = nombresCajero[cajeroEnTurno()];
+    mostrarMensaje("mensajeCierre", "Caja cerrada. La caja queda para " + otro + ". Se cerrará la sesión.");
+
+    let boton = document.getElementById("btnConfirmarCierre");
+    boton.disabled = true;
+    setTimeout(cerrarSesion, 2500);
 }
 
 function cerrarSesion() {
