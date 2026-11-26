@@ -45,7 +45,7 @@
                             <input type="text" class="form-control" id="idCliente" placeholder="Ej: 1020304050" inputmode="numeric">
                         </div>
                         <div class="col-12 col-md-6">
-                            <button type="button" class="boton-naranja w-100" id="btnBuscarCliente" onclick="buscarCliente()">
+                            <button type="button" class="boton-naranja w-100 control-cajero" onclick="buscarCliente()">
                                 <span class="bi bi-search"></span>Buscar cliente
                             </button>
                         </div>
@@ -67,7 +67,7 @@
                             <input type="date" class="form-control" id="cumpleCliente">
                         </div>
                         <div class="col-12">
-                            <button type="button" class="boton-naranja" id="btnRegistrarCliente" onclick="registrarCliente()">
+                            <button type="button" class="boton-naranja control-cajero" onclick="registrarCliente()">
                                 <span class="bi bi-person-plus"></span>Registrar cliente
                             </button>
                         </div>
@@ -140,13 +140,16 @@
                     </div>
 
                     <div class="d-grid gap-2 no-imprimir">
-                        <button type="button" class="boton-naranja justify-content-center" id="btnRegistrarVenta" onclick="registrarVenta()">
+                        <button type="button" class="boton-naranja justify-content-center control-cajero" onclick="registrarVenta()">
                             <span class="bi bi-cash-coin"></span>Registrar venta
                         </button>
-                        <button type="button" class="boton-rojo justify-content-center" id="btnImprimir" onclick="imprimirFactura()">
+                        <button type="button" class="boton-rojo justify-content-center" onclick="imprimirFactura()">
                             <span class="bi bi-printer"></span>Imprimir factura
                         </button>
-                        <button type="button" class="boton-cerrar justify-content-center" onclick="abrirCierre()">
+                        <button type="button" class="boton-naranja justify-content-center control-cajero" onclick="nuevaVenta()">
+                            <span class="bi bi-arrow-repeat"></span>Nueva venta
+                        </button>
+                        <button type="button" class="boton-cerrar justify-content-center control-cajero" onclick="abrirCierre()">
                             <span class="bi bi-door-closed"></span>Cerrar caja
                         </button>
                     </div>
@@ -169,7 +172,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                 </div>
                 <div class="modal-body">
-                    <p class="text-muted mb-3">Resumen del turno para el administrador.</p>
+                    <p class="text-muted mb-3">Al cerrar, la caja pasa al otro cajero.</p>
 
                     <div class="fila-cierre">
                         <span><span class="bi bi-person-badge me-2"></span>Cajero</span>
@@ -180,25 +183,8 @@
                         <strong id="cierreFecha">—</strong>
                     </div>
                     <div class="fila-cierre">
-                        <span><span class="bi bi-clock-history me-2"></span>Apertura</span>
-                        <strong id="cierreApertura">—</strong>
-                    </div>
-                    <div class="fila-cierre">
-                        <span><span class="bi bi-clock me-2"></span>Cierre</span>
+                        <span><span class="bi bi-clock me-2"></span>Hora de cierre</span>
                         <strong id="cierreHora">—</strong>
-                    </div>
-
-                    <hr>
-
-                    <div class="fila-cierre">
-                        <span><span class="bi bi-receipt me-2"></span>N.° de ventas</span>
-                        <strong id="cierreVentas">0</strong>
-                    </div>
-                    <div id="cierrePorMedio"></div>
-
-                    <div class="fila-cierre total-cierre">
-                        <span>Total de la jornada</span>
-                        <strong id="cierreTotal">$ 0</strong>
                     </div>
 
                     <div class="mt-3" id="mensajeCierre" aria-live="polite"></div>
@@ -215,6 +201,7 @@
     <footer class="pie">&copy; 2026 El Broaster del Chef</footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../comun.js"></script>
     <script src="cajero.js"></script>
 
 </body>
