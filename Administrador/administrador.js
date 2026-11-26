@@ -393,6 +393,10 @@ async function registrarCompra() {
     }
 }
 
+function nuevaCompra() {
+    verProveedor();   // reinicia el pedido, los totales y el número de orden
+}
+
 function imprimirCompra() {
     window.print();
 }

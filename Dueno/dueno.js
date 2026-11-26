@@ -121,11 +121,7 @@ function tablaProveedores(proveedores) {
     document.getElementById("tablaProveedores").innerHTML = html;
 }
 
-// ===== Inventario =====
-async function cargarInventario() {
-    tablaInventario(await api("/inventario"));
-}
-
+// ===== Inventario (solo lectura) =====
 function tablaInventario(inventario) {
     document.getElementById("tablaInventario").innerHTML = inventario.map(p => {
         let bajo = p.Minimo !== null && p.Stock < p.Minimo;
@@ -136,39 +132,6 @@ function tablaInventario(inventario) {
                 <td><span class="estado ${bajo ? "estado-bajo" : "estado-ok"}">${bajo ? "Stock bajo" : "Suficiente"}</span></td>
             </tr>`;
     }).join("");
-}
-
-function abrirInsumo() {
-    limpiarAviso("mensajeInsumo");
-    bootstrap.Modal.getOrCreateInstance(document.getElementById("modalStock")).show();
-}
-
-async function guardarInsumo() {
-    let nombre = document.getElementById("nombreInsumo").value.trim();
-    let cantidad = document.getElementById("cantidadInsumo").value.trim();
-
-    if (nombre === "" || cantidad === "") {
-        aviso("mensajeInsumo", "Escribe el producto y la cantidad.", "warning");
-        return;
-    }
-
-    try {
-        await api("/inventario", "POST", {
-            nombre: nombre,
-            categoria: document.getElementById("categoriaInsumo").value,
-            cantidad: soloNumeros(cantidad),
-            unidad: document.getElementById("unidadInsumo").value
-        });
-    } catch (error) {
-        aviso("mensajeInsumo", error.message, "danger");
-        return;
-    }
-
-    bootstrap.Modal.getOrCreateInstance(document.getElementById("modalStock")).hide();
-    document.getElementById("nombreInsumo").value = "";
-    document.getElementById("cantidadInsumo").value = "";
-    aviso("mensajeInventario", `Insumo "${nombre}" agregado.`);
-    await cargarInventario();
 }
 
 // ===== Observaciones =====

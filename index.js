@@ -181,6 +181,7 @@ app.post("/api/ventas", requiere("cajero"), async (req, res) => {
         // Si el cliente o el medio de pago no existen, MySQL rechaza la venta por las llaves foráneas
         await c.query("INSERT INTO Venta VALUES (?, ?, ?, ?, ?)", [id, hoy(), idCliente, idCajero, idMedioPago]);
 
+        let subtotal = 0;
         for (let i of items) {
             // Las gaseosas (Reventa) salen del stock; lo preparado se cocina al momento
             let [p] = await c.query("SELECT Nombre_producto, Stock, Tipo_producto FROM Producto WHERE Id_producto = ? FOR UPDATE", [i.idProducto]);
@@ -188,8 +189,17 @@ app.post("/api/ventas", requiere("cajero"), async (req, res) => {
                 if (p[0].Stock < i.cantidad) throw fallo(409, `No hay suficiente ${p[0].Nombre_producto} (quedan ${p[0].Stock}).`);
                 await c.query("UPDATE Producto SET Stock = Stock - ? WHERE Id_producto = ?", [i.cantidad, i.idProducto]);
             }
+            subtotal += PRECIO_VENTA[i.idProducto] * i.cantidad;
             await c.query("INSERT INTO Detalle_venta VALUES (?, ?, ?, ?, ?)",
                 [await nuevoId(c, "Detalle_venta", "Id_detalle_venta"), i.cantidad, PRECIO_VENTA[i.idProducto], id, i.idProducto]);
+        }
+
+        // El total de la venta (con IVA) se suma al estado de cuenta del dueño
+        let total = Math.round(subtotal * (1 + IVA_VENTA));
+        let [dueno] = await c.query("SELECT Usuario FROM Dueno LIMIT 1");
+        if (dueno.length > 0) {
+            await c.query("INSERT INTO Estado_cuenta VALUES (?, ?, ?)",
+                [await nuevoId(c, "Estado_cuenta", "Id_estado_cuenta"), total, dueno[0].Usuario]);
         }
         return id;
     });
@@ -296,16 +306,6 @@ app.get("/api/inventario", requiere("dueno", "administrativo"), async (req, res)
         GROUP BY p.Id_producto
         ORDER BY p.Categoria, p.Id_producto`);
     res.json(filas.map(p => ({ ...p, ...separarUnidad(p.Nombre_producto), Minimo: STOCK_MINIMO[p.Id_producto] ?? null })));
-});
-
-app.post("/api/inventario", requiere("dueno"), async (req, res) => {
-    let { nombre, categoria, cantidad, unidad } = req.body;
-    if (!nombre || !categoria || !unidad || !(cantidad >= 0)) throw fallo(400, "Escribe el producto y la cantidad.");
-    await transaccion(async c => {
-        await c.query("INSERT INTO Producto VALUES (?, ?, ?, ?, 'Insumo')",
-            [await nuevoId(c, "Producto", "Id_producto"), `${nombre} (${unidad})`, cantidad, categoria]);
-    });
-    res.json({ ok: true });
 });
 
 app.get("/api/proveedores", requiere("dueno", "administrativo"), async (req, res) => {
