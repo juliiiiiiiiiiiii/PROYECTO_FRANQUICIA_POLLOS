@@ -1,12 +1,4 @@
--- =====================================================================
---  Franquicia_Pollos - Consultas de ejemplo
--- =====================================================================
-
 USE Franquicia_Pollos;
-
--- ---------------------------------------------------------------------
--- VENTAS
--- ---------------------------------------------------------------------
 
 -- 1. Todas las ventas con cliente, cajero y medio de pago
 SELECT v.Id_venta, v.Fecha_compra, cl.Nombre AS Cliente, ca.Nombre AS Cajero, mp.Nombre AS Medio_pago
@@ -40,18 +32,10 @@ FROM Medio_Pago mp
 JOIN Venta v ON v.Id_medio_pago = mp.Id_medio_pago
 GROUP BY mp.Nombre;
 
--- ---------------------------------------------------------------------
--- DINERO
--- ---------------------------------------------------------------------
-
 -- 6. Saldo del dueño
 SELECT Usuario_dueno, SUM(Monto) AS Saldo
 FROM Estado_cuenta
 GROUP BY Usuario_dueno;
-
--- ---------------------------------------------------------------------
--- INVENTARIO Y PROVEEDORES
--- ---------------------------------------------------------------------
 
 -- 7. Stock de insumos y gaseosas
 SELECT Nombre_producto, Stock, Categoria
@@ -76,10 +60,6 @@ SELECT oc.Id_Orden_compra, oc.Fecha_comision, pr.Nombre_proveedor
 FROM Orden_compra oc
 JOIN Proveedor pr ON pr.Id_proveedor = oc.Id_proveedor;
 
--- ---------------------------------------------------------------------
--- PERSONAL
--- ---------------------------------------------------------------------
-
 -- 11. Cuántos empleados hay por cargo
 SELECT Cargo, COUNT(Id_Empleado) AS Cantidad
 FROM Empleado
@@ -95,10 +75,6 @@ SELECT t.Fecha, t.Hora_inicio, t.Hora_fin, ca.Nombre AS Cajero
 FROM Turno_cajero t
 JOIN Cajero ca ON ca.Id_Cajero = t.Id_cajero
 ORDER BY t.Fecha;
-
--- ---------------------------------------------------------------------
--- CLIENTES
--- ---------------------------------------------------------------------
 
 -- 14. Cuántas compras hizo cada cliente
 SELECT cl.Nombre AS Cliente, COUNT(v.Id_venta) AS Compras
