@@ -1,77 +1,87 @@
-const IVA = 0.08;
-const turnos = { 1: "Día", 2: "Noche" };
-const nombresCajero = { 1: "Lucía Torres (Día)", 2: "Miguel Soto (Noche)" };
-
-const mediosPago = ["Efectivo", "Tarjeta", "Transferencia / Nequi"];
-
-// Menú: [Id_producto, nombre, precio]
-const menu = [
-    ["Pollo broaster", [[1, "Broaster 8 presas", 50000], [2, "Broaster 4 presas", 28000], [3, "Alitas broaster", 22000]]],
-    ["Pollos a la brasa", [[4, "Pollo entero", 52000], [5, "Medio pollo", 30000], [6, "Cuarto de pollo", 17000]]],
-    ["Complementos", [[7, "Papas fritas", 8000], [8, "Ensalada fresca", 7000], [9, "Mollejitas", 10000]]],
-    ["Bebidas", [[10, "Gaseosa personal", 4500], [11, "Gaseosa 1.5 L", 8000], [12, "Jugo natural", 6000]]],
-    ["Combos", [[13, "Combo Familiar", 68000], [14, "Combo Pareja", 40000], [15, "Combo Broaster", 64000]]]
-];
-const precios = {};
-menu.forEach(g => g[1].forEach(p => precios[p[0]] = { nombre: p[1], precio: p[2] }));
+// Nombre que se muestra para cada categoría de la tabla Producto
+const nombresGrupo = {
+    "Broaster": "Pollo broaster",
+    "Brasa": "Pollos a la brasa",
+    "Complementos": "Complementos",
+    "Bebidas": "Bebidas",
+    "Combos": "Combos"
+};
 
 const cajero = usuarioActivo("cajero");
+let IVA = 0;
+let horarios = {};
+let precios = {};      // Id_producto -> { nombre, precio }
 let cliente = null;
 let cantidades = {};
 let miTurno = false;
+let ventaRegistrada = false;
 
-// El turno activo (1 o 2) se comparte entre los dos cajeros con localStorage. Empieza en el Cajero 1.
-function turnoActivo() {
-    return Number(localStorage.getItem("cajeroEnTurno") || "1");
-}
-
-function iniciar() {
+async function iniciar() {
     if (!cajero) return;
 
     document.getElementById("nombreCajero").textContent = cajero.nombre;
-    document.getElementById("turnoCajero").textContent = "· Turno " + turnos[cajero.idCajero];
     document.getElementById("facturaCajero").textContent = cajero.nombre;
     document.getElementById("fechaFactura").textContent = fechaHoy();
-    document.getElementById("etiquetaIva").textContent = `IVA (${IVA * 100}%)`;
-    document.getElementById("metodoPago").innerHTML = mediosPago.map((m, i) => `<option value="${i + 1}">${m}</option>`).join("");
 
-    dibujarMenu();
-    dibujarFactura();
-    revisarTurno();
+    try {
+        let config = await api("/config");
+        IVA = config.ivaVenta;
+        horarios = config.horarios;
+        document.getElementById("turnoCajero").textContent = "· Turno " + horarios[cajero.idCajero].turno;
+        document.getElementById("etiquetaIva").textContent = `IVA (${IVA * 100}%)`;
+
+        let medios = await api("/medios-pago");
+        document.getElementById("metodoPago").innerHTML = medios
+            .map(m => `<option value="${m.Id_medio_pago}">${escapar(m.Nombre)}</option>`).join("");
+
+        dibujarMenu(await api("/menu"));
+        dibujarFactura();
+        await revisarTurno();
+    } catch (error) {
+        aviso("mensajeTurno", error.message, "danger");
+    }
 }
 
-// Habilita la caja solo si es el turno de este cajero
-function revisarTurno() {
-    miTurno = turnoActivo() === cajero.idCajero;
+// Habilita la caja solo si es el turno de este cajero (según los cierres guardados en Turno_cajero)
+async function revisarTurno() {
+    let turno = await api("/turno");
+    miTurno = turno.enTurno === cajero.idCajero;
 
     document.querySelectorAll(".control-cajero").forEach(e => e.disabled = !miTurno);
 
     if (miTurno) {
         limpiarAviso("mensajeTurno");
+    } else if (turno.enTurno === null) {
+        aviso("mensajeTurno", "La caja ya se cerró por hoy.", "warning");
     } else {
-        aviso("mensajeTurno", "La caja la tiene " + nombresCajero[turnoActivo()] + ". Debes esperar a que cierre su turno y te entregue la caja.", "warning");
+        aviso("mensajeTurno", "La caja la tiene " + turno.nombreEnTurno + ". Debes esperar a que cierre su turno y te entregue la caja.", "warning");
     }
 }
 
 // ===== Menú =====
-function dibujarMenu() {
+function dibujarMenu(productos) {
     let html = "";
-    menu.forEach(grupo => {
-        html += `<tr><td colspan="3" class="grupo-menu">${grupo[0]}</td></tr>`;
-        grupo[1].forEach(p => {
-            html += `
-                <tr>
-                    <td>${p[1]}</td>
-                    <td class="precio-celda">${pesos(p[2])}</td>
-                    <td>
-                        <div class="control-cantidad">
-                            <button type="button" class="boton-cant control-cajero" onclick="sumar(${p[0]}, -1)">−</button>
-                            <input type="text" class="input-cantidad control-cajero" id="cant-${p[0]}" value="0" inputmode="numeric" oninput="escribir(${p[0]}, this.value)">
-                            <button type="button" class="boton-cant control-cajero" onclick="sumar(${p[0]}, 1)">+</button>
-                        </div>
-                    </td>
-                </tr>`;
-        });
+    let grupoActual = "";
+    precios = {};
+
+    productos.forEach(p => {
+        precios[p.Id_producto] = { nombre: p.Nombre_producto, precio: p.Precio };
+        if (p.Categoria !== grupoActual) {
+            grupoActual = p.Categoria;
+            html += `<tr><td colspan="3" class="grupo-menu">${escapar(nombresGrupo[grupoActual] || grupoActual)}</td></tr>`;
+        }
+        html += `
+            <tr>
+                <td>${escapar(p.Nombre_producto)}</td>
+                <td class="precio-celda">${pesos(p.Precio)}</td>
+                <td>
+                    <div class="control-cantidad">
+                        <button type="button" class="boton-cant control-cajero" onclick="sumar(${p.Id_producto}, -1)">−</button>
+                        <input type="text" class="input-cantidad control-cajero" id="cant-${p.Id_producto}" value="0" inputmode="numeric" oninput="escribir(${p.Id_producto}, this.value)">
+                        <button type="button" class="boton-cant control-cajero" onclick="sumar(${p.Id_producto}, 1)">+</button>
+                    </div>
+                </td>
+            </tr>`;
     });
     document.getElementById("tablaMenu").innerHTML = html;
 }
@@ -101,7 +111,7 @@ function dibujarFactura() {
         let p = precios[id];
         let importe = cantidades[id] * p.precio;
         subtotal += importe;
-        html += `<tr><td>${p.nombre}</td><td class="text-end">${cantidades[id]}</td><td class="text-end">${pesos(importe)}</td></tr>`;
+        html += `<tr><td>${escapar(p.nombre)}</td><td class="text-end">${cantidades[id]}</td><td class="text-end">${pesos(importe)}</td></tr>`;
     }
     if (html === "") html = `<tr><td colspan="3" class="text-muted">Aún no hay productos.</td></tr>`;
 
@@ -115,20 +125,26 @@ function dibujarFactura() {
 }
 
 // ===== Cliente =====
-function buscarCliente() {
+async function buscarCliente() {
     let id = soloNumeros(document.getElementById("idCliente").value);
     if (!id) {
         aviso("mensajeCliente", "Escribe el número de identificación.", "warning");
         return;
     }
-    let nombre = document.getElementById("nombreCliente").value.trim() || "Cliente " + id;
-    document.getElementById("nombreCliente").value = nombre;
-    cliente = { id: id, nombre: nombre };
-    aviso("mensajeCliente", "Cliente seleccionado: " + nombre + ".");
+    try {
+        let encontrado = await api("/clientes/" + id);
+        cliente = { id: encontrado.Id_cliente, nombre: encontrado.Nombre };
+        document.getElementById("nombreCliente").value = encontrado.Nombre;
+        document.getElementById("cumpleCliente").value = encontrado.Fecha_nacimiento;
+        aviso("mensajeCliente", "Cliente seleccionado: " + encontrado.Nombre + ".");
+    } catch (error) {
+        cliente = null;
+        aviso("mensajeCliente", error.message, "warning");
+    }
     dibujarFactura();
 }
 
-function registrarCliente() {
+async function registrarCliente() {
     let id = soloNumeros(document.getElementById("idCliente").value);
     let nombre = document.getElementById("nombreCliente").value.trim();
     let cumple = document.getElementById("cumpleCliente").value;
@@ -137,13 +153,22 @@ function registrarCliente() {
         aviso("mensajeCliente", "Para registrar llena identificación, nombre y fecha de cumpleaños.", "warning");
         return;
     }
-    cliente = { id: id, nombre: nombre };
-    aviso("mensajeCliente", "Cliente " + nombre + " registrado.");
+    try {
+        let nuevo = await api("/clientes", "POST", { id: id, nombre: nombre, fechaNacimiento: cumple });
+        cliente = { id: nuevo.Id_cliente, nombre: nuevo.Nombre };
+        aviso("mensajeCliente", "Cliente " + nuevo.Nombre + " registrado.");
+    } catch (error) {
+        aviso("mensajeCliente", error.message, "warning");
+    }
     dibujarFactura();
 }
 
 // ===== Venta =====
-function registrarVenta() {
+async function registrarVenta() {
+    if (ventaRegistrada) {
+        aviso("mensajeVenta", "Esta venta ya se registró. Presiona Nueva venta para empezar otra.", "warning");
+        return;
+    }
     if (!cliente) {
         aviso("mensajeVenta", "Busca o registra al cliente antes de la venta.", "warning");
         return;
@@ -153,16 +178,25 @@ function registrarVenta() {
         return;
     }
 
-    let numero = Number(localStorage.getItem("ultimaFactura") || "0") + 1;
-    localStorage.setItem("ultimaFactura", numero);
-
-    document.getElementById("numeroFactura").textContent = "N.° " + String(numero).padStart(4, "0");
-    aviso("mensajeVenta", "Venta N.° " + numero + " registrada. Imprime la factura o empieza una nueva.");
+    let items = Object.keys(cantidades).map(id => ({ idProducto: Number(id), cantidad: cantidades[id] }));
+    try {
+        let respuesta = await api("/ventas", "POST", {
+            idCliente: cliente.id,
+            idMedioPago: Number(document.getElementById("metodoPago").value),
+            items: items
+        });
+        ventaRegistrada = true;
+        document.getElementById("numeroFactura").textContent = "N.° " + String(respuesta.idVenta).padStart(4, "0");
+        aviso("mensajeVenta", "Venta N.° " + respuesta.idVenta + " registrada. Imprime la factura o empieza una nueva.");
+    } catch (error) {
+        aviso("mensajeVenta", error.message, "danger");
+    }
 }
 
 function nuevaVenta() {
     cliente = null;
     cantidades = {};
+    ventaRegistrada = false;
     document.querySelectorAll(".input-cantidad").forEach(c => c.value = 0);
     document.getElementById("idCliente").value = "";
     document.getElementById("nombreCliente").value = "";
@@ -182,16 +216,23 @@ function abrirCierre() {
     document.getElementById("cierreCajero").textContent = cajero.nombre;
     document.getElementById("cierreFecha").textContent = fechaHoy();
     document.getElementById("cierreHora").textContent = horaAhora();
+    document.getElementById("btnConfirmarCierre").disabled = false;
     limpiarAviso("mensajeCierre");
     bootstrap.Modal.getOrCreateInstance(document.getElementById("modalCierre")).show();
 }
 
-function confirmarCierre() {
-    // Entrega la caja al otro cajero y cierra la sesión
-    let siguiente = cajero.idCajero === 1 ? 2 : 1;
-    localStorage.setItem("cajeroEnTurno", siguiente);
-    aviso("mensajeCierre", "Caja cerrada. La caja queda para " + nombresCajero[siguiente] + ".");
-    setTimeout(cerrarSesion, 2500);
+async function confirmarCierre() {
+    // Guarda el turno en Turno_cajero: la caja pasa al otro cajero y se cierra la sesión
+    document.getElementById("btnConfirmarCierre").disabled = true;
+    try {
+        let cierre = await api("/turno/cerrar", "POST");
+        let texto = cierre.siguiente ? "Caja cerrada. La caja queda para el turno de la noche." : "Caja cerrada. Terminó la jornada de hoy.";
+        aviso("mensajeCierre", texto);
+        setTimeout(cerrarSesion, 2500);
+    } catch (error) {
+        document.getElementById("btnConfirmarCierre").disabled = false;
+        aviso("mensajeCierre", error.message, "danger");
+    }
 }
 
 iniciar();

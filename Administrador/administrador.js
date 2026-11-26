@@ -1,6 +1,3 @@
-const IVA_COMPRA = 0.19;
-const limites = { Cajero: 2, Mesero: 4, Aseo: 2, Cocinero: 5 };
-
 // Tipo de observación -> [clase de color, ícono]
 const tiposObs = {
     "Aumento": ["tipo-aumento", "bi-graph-up-arrow"],
@@ -9,83 +6,67 @@ const tiposObs = {
     "Compra": ["tipo-compra", "bi-cart"]
 };
 
-// ===== Datos de ejemplo (luego vendrán de la base de datos) =====
-const cierres = [
-    { cajero: 1, nombre: "Lucía Torres", apertura: "08:00", cierre: "16:00", ventas: 2, total: 174800, cerrado: true },
-    { cajero: 2, nombre: "Miguel Soto", apertura: "16:00", cierre: "", ventas: 1, total: 68000, cerrado: false }
-];
-
-// Personal: [nombre, cargo, nacimiento, sueldo]
-let personal = [
-    ["Lucía Torres", "Cajero", "1996-03-21", 1800000],
-    ["Miguel Soto", "Cajero", "1994-11-08", 1800000],
-    ["Ana Pérez", "Mesero", "1998-04-10", 1750000],
-    ["Valentina Gómez", "Mesero", "2000-08-19", 1750000],
-    ["Andrés Rojas", "Mesero", "1997-01-25", 1750000],
-    ["Marta Herrera", "Aseo", "1975-06-30", 1750000],
-    ["José Díaz", "Cocinero", "1980-03-05", 2500000],
-    ["Carlos Mejía", "Cocinero", "1991-12-17", 2200000],
-    ["Diana López", "Cocinero", "1993-05-22", 2200000],
-    ["Felipe Vargas", "Cocinero", "1995-09-09", 2200000]
-];
-
-// Productos de cada proveedor: [nombre, stock, precio de compra, stock bajo]
-const proveedores = [
-    { nombre: "Avícola San Pedro", telefono: "987 654 321", productos: [["Pollo entero crudo", "120 und", 14000, false], ["Alitas de pollo", "12 kg", 16000, true]] },
-    { nombre: "Distribuidora La Papa", telefono: "955 112 233", productos: [["Papa", "15 kg", 2500, true]] },
-    { nombre: "Bebidas del Sur", telefono: "944 778 990", productos: [["Gaseosa 1.5 L", "30 und", 5000, false]] }
-];
-
-const stock = [
-    ["Pollo", "Pollo entero crudo", "und", 120, 60],
-    ["Pollo", "Alitas de pollo", "kg", 12, 20],
-    ["Acompañamientos", "Papa", "kg", 15, 50],
-    ["Insumos de cocina", "Aceite vegetal", "litro", 8, 20],
-    ["Bebidas", "Gaseosa 1.5 L", "und", 30, 24]
-];
-
 const admin = usuarioActivo("administrativo");
+let IVA_COMPRA = 0;
+let limites = {};
+let personal = [];      // Cajeros + empleados de la base de datos
+let proveedores = [];
 let seleccionado = null;
 let pedido = {};
 
-function iniciar() {
+async function iniciar() {
     if (!admin) return;
     document.getElementById("nombreAdmin").textContent = admin.nombre;
     document.getElementById("fechaOrden").textContent = fechaHoy();
     document.getElementById("ordenSolicita").textContent = admin.nombre;
-    document.getElementById("etiquetaIvaCompra").textContent = `IVA (${IVA_COMPRA * 100}%)`;
+    document.getElementById("fechaCierre").value = fechaHoy();
 
-    tablaCierres();
-    listaObservaciones();
-    cupos();
-    tablaEmpleados();
-    tablaStock();
-    opcionesProveedor();
-    verProveedor();
+    try {
+        let config = await api("/config");
+        IVA_COMPRA = config.ivaCompra;
+        limites = config.limites;
+        document.getElementById("etiquetaIvaCompra").textContent = `IVA (${IVA_COMPRA * 100}%)`;
+
+        listaObservaciones();
+        await Promise.all([tablaCierres(), cargarEmpleados(), tablaStock(), cargarProveedores()]);
+    } catch (error) {
+        alert(error.message);
+    }
 }
 
 // ===== Cierres de caja =====
-function tablaCierres() {
-    document.getElementById("tarjetasCierre").innerHTML = cierres.map(c => `
+async function tablaCierres() {
+    let fecha = document.getElementById("fechaCierre").value || fechaHoy();
+    let cierres = await api("/cierres?fecha=" + fecha);
+
+    document.getElementById("tarjetasCierre").innerHTML = cierres.map(c => {
+        let medios = Object.keys(c.porMedio)
+            .map(m => `<div class="fila-cierre"><span>${escapar(m)}</span><strong>${pesos(c.porMedio[m])}</strong></div>`)
+            .join("");
+        return `
         <div class="col-12 col-md-6">
             <div class="tarjeta-cierre">
                 <div class="cabecera-cierre">
-                    <h3><span class="bi bi-person-badge me-2"></span>Cajero ${c.cajero}</h3>
+                    <h3><span class="bi bi-person-badge me-2"></span>Cajero ${c.idCajero}</h3>
                     <span class="${c.cerrado ? "estado-ok" : "estado-pendiente"}">${c.cerrado ? "Recibido" : "Turno abierto"}</span>
                 </div>
-                <div class="fila-cierre"><span>Responsable</span><strong>${c.nombre}</strong></div>
-                <div class="fila-cierre"><span>Apertura</span><strong>${c.apertura}</strong></div>
-                <div class="fila-cierre"><span>Cierre</span><strong>${c.cierre || "Pendiente"}</strong></div>
+                <div class="fila-cierre"><span>Responsable</span><strong>${escapar(c.nombre)}</strong></div>
+                <div class="fila-cierre"><span>Apertura</span><strong>${horaCorta(c.apertura)}</strong></div>
+                <div class="fila-cierre"><span>Cierre</span><strong>${c.cierre ? horaCorta(c.cierre) : "Pendiente"}</strong></div>
                 <div class="fila-cierre"><span>N.° de ventas</span><strong>${c.ventas}</strong></div>
+                ${medios}
                 <div class="fila-cierre total-cierre"><span>Total del turno</span><strong>${pesos(c.total)}</strong></div>
             </div>
-        </div>`).join("");
+        </div>`;
+    }).join("");
 
     document.getElementById("ventasDia").textContent = cierres.reduce((s, c) => s + c.ventas, 0);
     document.getElementById("totalDia").textContent = pesos(cierres.reduce((s, c) => s + c.total, 0));
 }
 
-// ===== Observaciones del dueño (llegan por localStorage) =====
+// ===== Observaciones del dueño =====
+// La base de datos no tiene tabla de observaciones, así que siguen en localStorage
+// (solo llegan si el dueño usa el mismo navegador).
 function leerObservaciones() {
     return JSON.parse(localStorage.getItem("observaciones") || "[]");
 }
@@ -107,11 +88,11 @@ function listaObservaciones() {
         return `
             <div class="observacion${o.atendida ? " atendida" : ""}">
                 <div class="cabecera-observacion">
-                    <span class="${tipo[0]}"><span class="bi ${tipo[1]} me-1"></span>${o.tipo}</span>
-                    <small>${o.fecha} · Sobre: <strong>${o.sobre}</strong></small>
+                    <span class="${tipo[0]}"><span class="bi ${tipo[1]} me-1"></span>${escapar(o.tipo)}</span>
+                    <small>${escapar(o.fecha)} · Sobre: <strong>${escapar(o.sobre)}</strong></small>
                     <span class="${o.atendida ? "estado-ok" : "estado-pendiente"} ms-auto">${o.atendida ? "Atendida" : "Pendiente"}</span>
                 </div>
-                <p class="${o.atendida ? "mb-0" : "mb-2"}">${o.texto}</p>
+                <p class="${o.atendida ? "mb-0" : "mb-2"}">${escapar(o.texto)}</p>
                 ${boton}
             </div>`;
     }).join("");
@@ -125,8 +106,14 @@ function atender(indice) {
 }
 
 // ===== Empleados =====
+async function cargarEmpleados() {
+    personal = await api("/empleados");
+    cupos();
+    tablaEmpleados();
+}
+
 function ocupados(cargo) {
-    return personal.filter(p => p[1] === cargo).length;
+    return personal.filter(p => p.Cargo === cargo).length;
 }
 
 function cupos() {
@@ -153,16 +140,17 @@ function tablaEmpleados() {
     let html = "";
 
     personal.forEach((p, i) => {
-        if (filtro !== "" && p[1] !== filtro) return;
+        if (filtro !== "" && p.Cargo !== filtro) return;
         visibles++;
-        total += p[3];
-        let despido = p[1] === "Cajero" ? "" : `<button type="button" class="boton-rojo boton-sm" onclick="abrirDespido(${i})"><span class="bi bi-person-x"></span>Despedir</button>`;
+        total += p.Sueldo_base;
+        // Los cajeros tienen usuario y turno propios, por eso no se despiden desde aquí
+        let despido = p.Tabla === "cajero" ? "" : `<button type="button" class="boton-rojo boton-sm" onclick="abrirDespido(${i})"><span class="bi bi-person-x"></span>Despedir</button>`;
         html += `
             <tr>
-                <td>${p[0]}</td>
-                <td><span class="cargo">${p[1]}</span></td>
-                <td>${p[2]}</td>
-                <td class="text-end sueldo">${pesos(p[3])}</td>
+                <td>${escapar(p.Nombre)}</td>
+                <td><span class="cargo">${escapar(p.Cargo)}</span></td>
+                <td>${escapar(p.Fecha_nacimiento)}</td>
+                <td class="text-end sueldo">${pesos(p.Sueldo_base)}</td>
                 <td class="acciones">
                     <button type="button" class="boton-naranja boton-sm" onclick="abrirAumento(${i})"><span class="bi bi-graph-up-arrow"></span>Aumento</button>
                     ${despido}
@@ -189,7 +177,7 @@ function abrirContratar() {
     bootstrap.Modal.getOrCreateInstance(document.getElementById("modalContratar")).show();
 }
 
-function contratar() {
+async function contratar() {
     let nombre = document.getElementById("nombreNuevo").value.trim();
     let nacimiento = document.getElementById("nacimientoNuevo").value;
     let cargo = document.getElementById("cargoNuevo").value;
@@ -199,27 +187,28 @@ function contratar() {
         aviso("mensajeContratar", "Llena nombre, fecha de nacimiento, cargo y sueldo.", "warning");
         return;
     }
-    if (ocupados(cargo) >= limites[cargo]) {
-        aviso("mensajeContratar", "No hay cupo para ese cargo.", "danger");
+
+    try {
+        await api("/empleados", "POST", { nombre: nombre, fechaNacimiento: nacimiento, cargo: cargo, sueldo: sueldo });
+    } catch (error) {
+        aviso("mensajeContratar", error.message, "danger");
         return;
     }
 
-    personal.push([nombre, cargo, nacimiento, sueldo]);
     bootstrap.Modal.getOrCreateInstance(document.getElementById("modalContratar")).hide();
     document.getElementById("nombreNuevo").value = "";
     document.getElementById("nacimientoNuevo").value = "";
     document.getElementById("sueldoNuevo").value = "";
     aviso("mensajeEmpleados", `${nombre} fue contratado como ${cargo}.`);
-    cupos();
-    tablaEmpleados();
+    await cargarEmpleados();
 }
 
 function abrirAumento(indice) {
     seleccionado = indice;
     let p = personal[indice];
-    document.getElementById("aumentoNombre").textContent = p[0];
-    document.getElementById("aumentoCargo").textContent = p[1];
-    document.getElementById("aumentoSueldoActual").textContent = pesos(p[3]);
+    document.getElementById("aumentoNombre").textContent = p.Nombre;
+    document.getElementById("aumentoCargo").textContent = p.Cargo;
+    document.getElementById("aumentoSueldoActual").textContent = pesos(p.Sueldo_base);
     document.getElementById("porcentajeAumento").value = "";
     document.getElementById("sueldoNuevoAumento").value = "";
     limpiarAviso("mensajeAumento");
@@ -229,66 +218,82 @@ function abrirAumento(indice) {
 function calcularAumento() {
     let porcentaje = Number(document.getElementById("porcentajeAumento").value.replace(",", "."));
     if (seleccionado !== null && porcentaje > 0) {
-        let nuevo = Math.round(personal[seleccionado][3] * (1 + porcentaje / 100));
+        let nuevo = Math.round(personal[seleccionado].Sueldo_base * (1 + porcentaje / 100));
         document.getElementById("sueldoNuevoAumento").value = nuevo.toLocaleString("es-CO");
     }
 }
 
-function aplicarAumento() {
+async function aplicarAumento() {
     let sueldo = soloNumeros(document.getElementById("sueldoNuevoAumento").value);
     if (!sueldo) {
         aviso("mensajeAumento", "Escribe el porcentaje o el nuevo sueldo.", "warning");
         return;
     }
-    personal[seleccionado][3] = sueldo;
+    let p = personal[seleccionado];
+    try {
+        await api("/empleados/aumento", "POST", { tabla: p.Tabla, id: p.Id, sueldo: sueldo });
+    } catch (error) {
+        aviso("mensajeAumento", error.message, "danger");
+        return;
+    }
     bootstrap.Modal.getOrCreateInstance(document.getElementById("modalAumento")).hide();
-    aviso("mensajeEmpleados", `Nuevo sueldo de ${personal[seleccionado][0]}: ${pesos(sueldo)}.`);
-    tablaEmpleados();
+    aviso("mensajeEmpleados", `Nuevo sueldo de ${p.Nombre}: ${pesos(sueldo)}.`);
+    await cargarEmpleados();
 }
 
 function abrirDespido(indice) {
     seleccionado = indice;
-    document.getElementById("despidoNombre").textContent = personal[indice][0];
-    document.getElementById("despidoCargo").textContent = personal[indice][1];
+    document.getElementById("despidoNombre").textContent = personal[indice].Nombre;
+    document.getElementById("despidoCargo").textContent = personal[indice].Cargo;
     limpiarAviso("mensajeDespido");
     bootstrap.Modal.getOrCreateInstance(document.getElementById("modalDespido")).show();
 }
 
-function confirmarDespido() {
-    let nombre = personal[seleccionado][0];
-    personal.splice(seleccionado, 1);
+async function confirmarDespido() {
+    let p = personal[seleccionado];
+    try {
+        await api("/empleados/" + p.Id, "DELETE");
+    } catch (error) {
+        aviso("mensajeDespido", error.message, "danger");
+        return;
+    }
     bootstrap.Modal.getOrCreateInstance(document.getElementById("modalDespido")).hide();
-    aviso("mensajeEmpleados", `${nombre} fue retirado de la nómina.`);
-    cupos();
-    tablaEmpleados();
+    aviso("mensajeEmpleados", `${p.Nombre} fue retirado de la nómina.`);
+    await cargarEmpleados();
 }
 
 // ===== Stock =====
-function tablaStock() {
+async function tablaStock() {
+    let stock = await api("/inventario");
     let categoria = "";
     let html = "";
     stock.forEach(s => {
-        if (s[0] !== categoria) {
-            categoria = s[0];
-            html += `<tr><td colspan="5" class="grupo-tabla">${categoria}</td></tr>`;
+        if (s.Categoria !== categoria) {
+            categoria = s.Categoria;
+            html += `<tr><td colspan="6" class="grupo-tabla">${escapar(categoria)}</td></tr>`;
         }
-        let bajo = s[3] < s[4];
+        let bajo = s.Minimo !== null && s.Stock < s.Minimo;
         html += `
             <tr>
-                <td>${s[1]}</td>
-                <td>${s[2]}</td>
-                <td class="text-end">${s[3]}</td>
-                <td class="text-end">${s[4]}</td>
+                <td>${escapar(s.nombre)}</td>
+                <td>${escapar(s.unidad)}</td>
+                <td class="text-end">${s.Stock}</td>
+                <td class="text-end">${s.Minimo ?? "—"}</td>
                 <td><span class="${bajo ? "stock-bajo" : "stock-ok"}">${bajo ? "Stock bajo" : "Suficiente"}</span></td>
+                <td>${escapar(s.Proveedor || "—")}</td>
             </tr>`;
     });
     document.getElementById("tablaStock").innerHTML = html;
 }
 
 // ===== Pedidos a proveedores =====
-function opcionesProveedor() {
+async function cargarProveedores() {
+    let elegido = document.getElementById("proveedor").value;
+    proveedores = await api("/proveedores");
     document.getElementById("proveedor").innerHTML =
-        proveedores.map((p, i) => `<option value="${i}">${p.nombre}</option>`).join("");
+        proveedores.map((p, i) => `<option value="${i}">${escapar(p.nombre)}</option>`).join("");
+    if (elegido !== "") document.getElementById("proveedor").value = elegido;
+    verProveedor();
 }
 
 function proveedorActual() {
@@ -301,15 +306,18 @@ function verProveedor() {
     limpiarAviso("mensajeCompra");
 
     let p = proveedorActual();
-    document.getElementById("contactoProveedor").textContent = p.nombre;
+    if (!p) return;
+    document.getElementById("contactoProveedor").textContent = p.contacto;
     document.getElementById("telefonoProveedor").textContent = p.telefono;
     document.getElementById("ordenProveedor").textContent = p.nombre;
 
-    document.getElementById("productosProveedor").innerHTML = p.productos.map((prod, i) => `
+    document.getElementById("productosProveedor").innerHTML = p.productos.map((prod, i) => {
+        let bajo = prod.minimo !== null && prod.stock < prod.minimo;
+        return `
         <tr>
-            <td>${prod[0]}</td>
-            <td class="text-end"><span class="${prod[3] ? "stock-bajo" : "stock-ok"}">${prod[1]}</span></td>
-            <td class="precio-celda">${pesos(prod[2])}</td>
+            <td>${escapar(prod.nombre)}</td>
+            <td class="text-end"><span class="${bajo ? "stock-bajo" : "stock-ok"}">${prod.stock} ${escapar(prod.unidad)}</span></td>
+            <td class="precio-celda">${pesos(prod.precio)} / ${escapar(prod.unidad)}</td>
             <td>
                 <div class="control-cantidad">
                     <button type="button" class="boton-cant" onclick="sumarCompra(${i}, -1)">−</button>
@@ -317,7 +325,8 @@ function verProveedor() {
                     <button type="button" class="boton-cant" onclick="sumarCompra(${i}, 1)">+</button>
                 </div>
             </td>
-        </tr>`).join("");
+        </tr>`;
+    }).join("");
 
     dibujarCompra();
 }
@@ -345,9 +354,9 @@ function dibujarCompra() {
 
     for (let i in pedido) {
         let prod = p.productos[i];
-        let importe = pedido[i] * prod[2];
+        let importe = pedido[i] * prod.precio;
         subtotal += importe;
-        html += `<tr><td>${prod[0]}</td><td class="text-end">${pedido[i]}</td><td class="text-end">${pesos(importe)}</td></tr>`;
+        html += `<tr><td>${escapar(prod.nombre)}</td><td class="text-end">${pedido[i]}</td><td class="text-end">${pesos(importe)}</td></tr>`;
     }
     if (html === "") html = `<tr><td colspan="3" class="text-muted">Aún no hay productos.</td></tr>`;
 
@@ -357,15 +366,31 @@ function dibujarCompra() {
     document.getElementById("totalCompra").textContent = pesos(subtotal + subtotal * IVA_COMPRA);
 }
 
-function registrarCompra() {
+async function registrarCompra() {
     if (Object.keys(pedido).length === 0) {
         aviso("mensajeCompra", "Agrega al menos un producto a la compra.", "warning");
         return;
     }
-    let numero = Number(localStorage.getItem("ultimaOrden") || "0") + 1;
-    localStorage.setItem("ultimaOrden", numero);
-    document.getElementById("numeroOrden").textContent = "N.° OC-" + String(numero).padStart(4, "0");
-    aviso("mensajeCompra", "Orden de compra OC-" + String(numero).padStart(4, "0") + " registrada.");
+    let p = proveedorActual();
+    let items = Object.keys(pedido).map(i => ({ idProducto: p.productos[i].id, cantidad: pedido[i] }));
+
+    let boton = document.getElementById("btnRegistrarCompra");
+    boton.disabled = true;
+    try {
+        let respuesta = await api("/compras", "POST", { idProveedor: p.id, items: items });
+        let numero = "OC-" + String(respuesta.idOrden).padStart(4, "0");
+        // Se recarga el stock (ya incluye lo comprado) y se deja la factura a la vista para imprimirla
+        await tablaStock();
+        proveedores = await api("/proveedores");
+        document.getElementById("numeroOrden").textContent = "N.° " + numero;
+        aviso("mensajeCompra", "Orden de compra " + numero + " registrada. El stock ya se actualizó.");
+        pedido = {};
+        document.querySelectorAll("#productosProveedor .input-cantidad").forEach(c => c.value = 0);
+    } catch (error) {
+        aviso("mensajeCompra", error.message, "danger");
+    } finally {
+        boton.disabled = false;
+    }
 }
 
 function imprimirCompra() {

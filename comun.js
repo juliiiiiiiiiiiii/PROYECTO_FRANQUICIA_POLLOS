@@ -32,17 +32,53 @@ function limpiarAviso(id) {
     document.getElementById(id).innerHTML = "";
 }
 
+// Evita que un texto de la base de datos (nombres, observaciones) se ejecute como HTML
+function escapar(texto) {
+    let reemplazos = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
+    return String(texto ?? "").replace(/[&<>"']/g, c => reemplazos[c]);
+}
+
+// "16:00:00" -> "16:00"
+function horaCorta(hora) {
+    return hora ? String(hora).slice(0, 5) : "";
+}
+
+// Pide datos al servidor (index.js), que es el que habla con MySQL.
+// Envía el token de la sesión y devuelve la respuesta ya convertida en objeto.
+async function api(ruta, metodo = "GET", datos) {
+    let usuario = JSON.parse(sessionStorage.getItem("usuario"));
+    let opciones = { method: metodo, headers: { "Content-Type": "application/json" } };
+    if (usuario && usuario.token) opciones.headers.Authorization = "Bearer " + usuario.token;
+    if (datos !== undefined) opciones.body = JSON.stringify(datos);
+
+    let respuesta;
+    try {
+        respuesta = await fetch("/api" + ruta, opciones);
+    } catch {
+        throw new Error("No hay conexión con el servidor. Revisa que esté encendido (npm start).");
+    }
+    let cuerpo = await respuesta.json().catch(() => ({}));
+
+    if (respuesta.status === 401 && ruta !== "/login") {
+        sessionStorage.removeItem("usuario");
+        window.location.href = "../Login/login.html";
+    }
+    if (!respuesta.ok) throw new Error(cuerpo.mensaje || "Error " + respuesta.status);
+    return cuerpo;
+}
+
 // Devuelve el usuario en sesión si tiene el rol pedido; si no, regresa al login
 function usuarioActivo(rol) {
     let usuario = JSON.parse(sessionStorage.getItem("usuario"));
-    if (!usuario || usuario.rol !== rol) {
+    if (!usuario || usuario.rol !== rol || !usuario.token) {
         window.location.href = "../Login/login.html";
         return null;
     }
     return usuario;
 }
 
-function cerrarSesion() {
+async function cerrarSesion() {
+    await api("/logout", "POST").catch(() => {});
     sessionStorage.removeItem("usuario");
     window.location.href = "../Login/login.html";
 }

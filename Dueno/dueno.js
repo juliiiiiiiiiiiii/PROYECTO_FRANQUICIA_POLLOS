@@ -1,63 +1,51 @@
-// ===== Datos de ejemplo (luego vendrán de la base de datos) =====
-const ventasHoy = [
-    { factura: 1, cajero: "Lucía Torres", cliente: "María López", medio: "Efectivo", total: 64800 },
-    { factura: 2, cajero: "Lucía Torres", cliente: "Pedro Gómez", medio: "Nequi", total: 110000 },
-    { factura: 3, cajero: "Miguel Soto", cliente: "Ana Ruiz", medio: "Tarjeta", total: 68000 }
-];
-
-const cierres = [
-    { caja: 1, cajero: "Lucía Torres", turno: "08:00 - 16:00", ventas: 2, total: 174800, cerrado: true },
-    { caja: 2, cajero: "Miguel Soto", turno: "16:00 - 23:00", ventas: 1, total: 68000, cerrado: false }
-];
-
-const proveedores = [
-    { nombre: "Avícola San Pedro", producto: "Pollo entero crudo", telefono: "987 654 321", contacto: "Juan Medina" },
-    { nombre: "Distribuidora La Papa", producto: "Papa", telefono: "955 112 233", contacto: "Rosa Quispe" },
-    { nombre: "Bebidas del Sur", producto: "Gaseosas", telefono: "944 778 990", contacto: "Luis Carrión" }
-];
-
-const inventario = [
-    { nombre: "Pollo entero crudo", cantidad: "120 und", bajo: false },
-    { nombre: "Papa", cantidad: "15 kg", bajo: true },
-    { nombre: "Aceite vegetal", cantidad: "8 litros", bajo: true },
-    { nombre: "Gaseosa 1.5 L", cantidad: "30 und", bajo: false }
-];
-
-const empleados = ["Lucía Torres", "Miguel Soto", "Ana Pérez", "José Díaz"];
-const saldo = 14320000;
-
 const dueno = usuarioActivo("dueno");
+let empleados = [];
 
-function iniciar() {
+async function iniciar() {
     if (!dueno) return;
     document.getElementById("nombreDueno").textContent = dueno.nombre;
 
-    resumenYVentas();
-    miCuenta();
-    tablaProveedores();
-    tablaInventario();
-    opcionesObservacion();
-    listaObservaciones();
+    try {
+        // Se piden todos los datos a la vez
+        let [ventas, cierres, cuenta, proveedores, inventario, personal] = await Promise.all([
+            api("/ventas?fecha=" + fechaHoy()),
+            api("/cierres?fecha=" + fechaHoy()),
+            api("/cuenta"),
+            api("/proveedores"),
+            api("/inventario"),
+            api("/empleados")
+        ]);
+        empleados = personal;
+
+        resumenYVentas(ventas, cierres);
+        miCuenta(ventas, cuenta.saldo);
+        tablaProveedores(proveedores);
+        tablaInventario(inventario);
+        opcionesObservacion();
+        listaObservaciones();
+    } catch (error) {
+        alert(error.message);
+    }
 }
 
 // ===== Resumen y Ventas =====
-function resumenYVentas() {
-    let total = ventasHoy.reduce((suma, v) => suma + v.total, 0);
-    let ticket = ventasHoy.length ? total / ventasHoy.length : 0;
+function resumenYVentas(ventas, cierres) {
+    let total = ventas.reduce((suma, v) => suma + v.Total, 0);
+    let ticket = ventas.length ? total / ventas.length : 0;
 
     document.getElementById("resumenVentas").textContent = pesos(total);
-    document.getElementById("resumenPedidos").textContent = ventasHoy.length;
+    document.getElementById("resumenPedidos").textContent = ventas.length;
     document.getElementById("resumenTicket").textContent = pesos(ticket);
     document.getElementById("resumenEmpleados").textContent = empleados.length;
     document.getElementById("ventasTotal").textContent = pesos(total);
-    document.getElementById("ventasPedidos").textContent = ventasHoy.length;
+    document.getElementById("ventasPedidos").textContent = ventas.length;
     document.getElementById("ventasTicket").textContent = pesos(ticket);
 
     document.getElementById("tablaCierres").innerHTML = cierres.map(c => `
         <tr>
             <td>Caja ${c.caja}</td>
-            <td>${c.cajero}</td>
-            <td>${c.turno}</td>
+            <td>${escapar(c.nombre)}</td>
+            <td>${horarioTurno(c)}</td>
             <td>${c.ventas}</td>
             <td>${pesos(c.total)}</td>
             <td>${estadoTurno(c.cerrado)}</td>
@@ -67,23 +55,29 @@ function resumenYVentas() {
         <div class="col-12 col-md-6">
             <div class="panel">
                 <div class="panel-cabecera">
-                    <h2><i class="bi bi-person-badge"></i>Caja ${c.caja} · ${c.cajero}</h2>
+                    <h2><i class="bi bi-person-badge"></i>Caja ${c.caja} · ${escapar(c.nombre)}</h2>
                     ${estadoTurno(c.cerrado)}
                 </div>
-                <div class="fila-dato"><span>Turno</span><strong>${c.turno}</strong></div>
+                <div class="fila-dato"><span>Turno</span><strong>${horarioTurno(c)}</strong></div>
                 <div class="fila-dato"><span>N.° de ventas</span><strong>${c.ventas}</strong></div>
                 <div class="fila-dato total"><span>Total</span><strong>${pesos(c.total)}</strong></div>
             </div>
         </div>`).join("");
 
-    document.getElementById("tablaVentas").innerHTML = ventasHoy.map(v => `
+    document.getElementById("tablaVentas").innerHTML = ventas.length === 0
+        ? `<tr><td colspan="5" class="text-muted">Todavía no hay ventas hoy.</td></tr>`
+        : ventas.map(v => `
         <tr>
-            <td>${String(v.factura).padStart(4, "0")}</td>
-            <td>${v.cajero}</td>
-            <td>${v.cliente}</td>
-            <td>${v.medio}</td>
-            <td>${pesos(v.total)}</td>
+            <td>${String(v.Id_venta).padStart(4, "0")}</td>
+            <td>${escapar(v.Cajero)}</td>
+            <td>${escapar(v.Cliente)}</td>
+            <td>${escapar(v.Medio)}</td>
+            <td>${pesos(v.Total)}</td>
         </tr>`).join("");
+}
+
+function horarioTurno(c) {
+    return horaCorta(c.apertura) + " - " + (c.cerrado ? horaCorta(c.cierre) : "en curso");
 }
 
 function estadoTurno(cerrado) {
@@ -92,40 +86,56 @@ function estadoTurno(cerrado) {
 }
 
 // ===== Mi cuenta =====
-function miCuenta() {
-    let efectivo = cierres.reduce((suma, c) => suma + c.total, 0);
+function miCuenta(ventas, saldo) {
+    let efectivo = ventas.filter(v => v.Medio === "Efectivo").reduce((suma, v) => suma + v.Total, 0);
+    let electronico = ventas.filter(v => v.Medio !== "Efectivo").reduce((suma, v) => suma + v.Total, 0);
+
     document.getElementById("saldoCuenta").textContent = pesos(saldo);
     document.getElementById("cuentaEfectivo").textContent = pesos(efectivo);
-    document.getElementById("cuentaElectronico").textContent = pesos(saldo - efectivo);
+    document.getElementById("cuentaElectronico").textContent = pesos(electronico);
 
-    document.getElementById("tablaMovimientos").innerHTML = ventasHoy.map(v => `
+    document.getElementById("tablaMovimientos").innerHTML = ventas.length === 0
+        ? `<tr><td colspan="4" class="text-muted">Todavía no hay ingresos hoy.</td></tr>`
+        : ventas.map(v => `
         <tr>
-            <td>${fechaHoy()}</td>
-            <td>Venta N.° ${String(v.factura).padStart(4, "0")} · ${v.cajero}</td>
+            <td>${v.Fecha_compra}</td>
+            <td>Venta N.° ${String(v.Id_venta).padStart(4, "0")} · ${escapar(v.Cajero)}</td>
             <td><span class="estado estado-ok">Ingreso</span></td>
-            <td class="monto-ingreso">+ ${pesos(v.total)}</td>
+            <td class="monto-ingreso">+ ${pesos(v.Total)}</td>
         </tr>`).join("");
 }
 
 // ===== Proveedores =====
-function tablaProveedores() {
-    document.getElementById("tablaProveedores").innerHTML = proveedores.map(p => `
-        <tr>
-            <td>${p.nombre}</td>
-            <td>${p.producto}</td>
-            <td>${p.telefono}</td>
-            <td>${p.contacto}</td>
-        </tr>`).join("");
+function tablaProveedores(proveedores) {
+    let html = "";
+    proveedores.forEach(p => {
+        let productos = p.productos.map(prod => prod.nombre).join(", ") || "—";
+        html += `
+            <tr>
+                <td>${escapar(p.nombre)}</td>
+                <td>${escapar(productos)}</td>
+                <td>${escapar(p.telefono)}</td>
+                <td>${escapar(p.contacto)}</td>
+            </tr>`;
+    });
+    document.getElementById("tablaProveedores").innerHTML = html;
 }
 
 // ===== Inventario =====
-function tablaInventario() {
-    document.getElementById("tablaInventario").innerHTML = inventario.map(p => `
-        <tr>
-            <td>${p.nombre}</td>
-            <td>${p.cantidad}</td>
-            <td><span class="estado ${p.bajo ? "estado-bajo" : "estado-ok"}">${p.bajo ? "Stock bajo" : "Suficiente"}</span></td>
-        </tr>`).join("");
+async function cargarInventario() {
+    tablaInventario(await api("/inventario"));
+}
+
+function tablaInventario(inventario) {
+    document.getElementById("tablaInventario").innerHTML = inventario.map(p => {
+        let bajo = p.Minimo !== null && p.Stock < p.Minimo;
+        return `
+            <tr>
+                <td>${escapar(p.nombre)}</td>
+                <td>${p.Stock} ${escapar(p.unidad)}</td>
+                <td><span class="estado ${bajo ? "estado-bajo" : "estado-ok"}">${bajo ? "Stock bajo" : "Suficiente"}</span></td>
+            </tr>`;
+    }).join("");
 }
 
 function abrirInsumo() {
@@ -133,7 +143,7 @@ function abrirInsumo() {
     bootstrap.Modal.getOrCreateInstance(document.getElementById("modalStock")).show();
 }
 
-function guardarInsumo() {
+async function guardarInsumo() {
     let nombre = document.getElementById("nombreInsumo").value.trim();
     let cantidad = document.getElementById("cantidadInsumo").value.trim();
 
@@ -142,27 +152,35 @@ function guardarInsumo() {
         return;
     }
 
-    inventario.push({
-        nombre: nombre,
-        cantidad: cantidad + " " + document.getElementById("unidadInsumo").value,
-        bajo: false
-    });
+    try {
+        await api("/inventario", "POST", {
+            nombre: nombre,
+            categoria: document.getElementById("categoriaInsumo").value,
+            cantidad: soloNumeros(cantidad),
+            unidad: document.getElementById("unidadInsumo").value
+        });
+    } catch (error) {
+        aviso("mensajeInsumo", error.message, "danger");
+        return;
+    }
 
     bootstrap.Modal.getOrCreateInstance(document.getElementById("modalStock")).hide();
     document.getElementById("nombreInsumo").value = "";
     document.getElementById("cantidadInsumo").value = "";
     aviso("mensajeInventario", `Insumo "${nombre}" agregado.`);
-    tablaInventario();
+    await cargarInventario();
 }
 
-// ===== Observaciones (se guardan en localStorage para que las vea el administrador) =====
+// ===== Observaciones =====
+// La base de datos no tiene tabla de observaciones, así que siguen en localStorage
+// (solo las ve el administrador si usa el mismo navegador).
 function leerObservaciones() {
     return JSON.parse(localStorage.getItem("observaciones") || "[]");
 }
 
 function opcionesObservacion() {
     document.getElementById("sobreObservacion").innerHTML =
-        empleados.map(e => `<option>${e}</option>`).join("") +
+        empleados.map(e => `<option>${escapar(e.Nombre)}</option>`).join("") +
         ["Cocina", "Inventario", "General"].map(a => `<option>${a}</option>`).join("");
 }
 
@@ -175,10 +193,10 @@ function listaObservaciones() {
     document.getElementById("listaObservaciones").innerHTML = lista.map(o => `
         <li>
             <div class="meta">
-                <span class="empleado">${o.sobre}</span> · ${o.tipo} · ${o.fecha}
+                <span class="empleado">${escapar(o.sobre)}</span> · ${escapar(o.tipo)} · ${escapar(o.fecha)}
                 · ${o.atendida ? "Atendida" : "Pendiente"}
             </div>
-            ${o.texto}
+            ${escapar(o.texto)}
         </li>`).join("");
 }
 
