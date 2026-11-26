@@ -6,7 +6,7 @@ INSERT INTO Dueno (Usuario, Contrasena, Nombre_dueno, Fecha_nacimiento) VALUES
 ('AlbiSteed', 'Dueno2026*', 'Albi steed', '2006-02-27');
 
 INSERT INTO Administrativo (Usuario, Contrasena, Nombre_administrativo, Fecha_nacimiento) VALUES
-('  SergioSuarez', 'Admin2026*', 'Sergio Suarez', '2007-11-25');
+('SergioSuarez', 'Admin2026*', 'Sergio Suarez', '2007-11-25');
 
 INSERT INTO Medio_Pago (Id_medio_pago, Nombre) VALUES
 (1, 'Efectivo'),
@@ -50,14 +50,14 @@ INSERT INTO Turno_cajero (Id_turno_cajero, Fecha, Hora_inicio, Hora_fin, Id_caje
 (26, '2026-11-13', '16:00:00', '23:00:00', 2, 2);
 
 INSERT INTO Empleado (Id_Empleado, Nombre, Fecha_nacimiento, Cargo, Sueldo_base, Administrativo_Usuario) VALUES
-(1, 'Ana Pérez',       '1998-04-10', 'Mesero',   1750000.00, 'laura.mendez'),
-(2, 'Valentina Gómez', '2000-08-19', 'Mesero',   1750000.00, 'laura.mendez'),
-(3, 'Andrés Rojas',    '1997-01-25', 'Mesero',   1750000.00, 'laura.mendez'),
-(4, 'Marta Herrera',   '1975-06-30', 'Aseo',     1750000.00, 'laura.mendez'),
-(5, 'José Díaz',       '1980-03-05', 'Cocinero', 2500000.00, 'laura.mendez'),
-(6, 'Carlos Mejía',    '1991-12-17', 'Cocinero', 2200000.00, 'laura.mendez'),
-(7, 'Diana López',     '1993-05-22', 'Cocinero', 2200000.00, 'laura.mendez'),
-(8, 'Felipe Vargas',   '1995-09-09', 'Cocinero', 2200000.00, 'laura.mendez');
+(1, 'Ana Pérez',       '1998-04-10', 'Mesero',   1750000.00, 'SergioSuarez'),
+(2, 'Valentina Gómez', '2000-08-19', 'Mesero',   1750000.00, 'SergioSuarez'),
+(3, 'Andrés Rojas',    '1997-01-25', 'Mesero',   1750000.00, 'SergioSuarez'),
+(4, 'Marta Herrera',   '1975-06-30', 'Aseo',     1750000.00, 'SergioSuarez'),
+(5, 'José Díaz',       '1980-03-05', 'Cocinero', 2500000.00, 'SergioSuarez'),
+(6, 'Carlos Mejía',    '1991-12-17', 'Cocinero', 2200000.00, 'SergioSuarez'),
+(7, 'Diana López',     '1993-05-22', 'Cocinero', 2200000.00, 'SergioSuarez'),
+(8, 'Felipe Vargas',   '1995-09-09', 'Cocinero', 2200000.00, 'SergioSuarez');
 
 INSERT INTO Producto (Id_producto, Nombre_producto, Stock, Categoria, Tipo_producto) VALUES
 (1,  'Broaster 8 presas',             0,   'Broaster',          'Preparado'),
@@ -126,6 +126,6 @@ INSERT INTO Producto_proveedor (Id_producto, Id_proveedor) VALUES
 (11, 15);
 
 INSERT INTO Estado_cuenta (Id_estado_cuenta, Monto, Usuario_dueno) VALUES
-(1, 14320000.00, 'carlos.ramirez');
+(1, 14320000.00, 'AlbiSteed');
 
 COMMIT;
